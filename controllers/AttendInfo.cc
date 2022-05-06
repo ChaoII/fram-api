@@ -3,13 +3,93 @@
 using namespace drogon::orm;
 
 using Attend = drogon_model::sqlite3::Attend;
+using Staff = drogon_model::sqlite3::Staff;
 // Add definition of your processing function here
+
+void save_face_info(Json::Value &staff_info) {
+    auto clientPtr = drogon::app().getDbClient();
+    Mapper<Staff> mp(clientPtr);
+    auto staff_id = staff_info["staff_id"].asString();
+    auto name = staff_info["name"].asString();
+    auto file_path = staff_info["file_path"].asString();
+    auto staff_ = mp.findBy(Criteria(Staff::Cols::_staff_id, CompareOperator::EQ, staff_id));
+    Staff staff;
+    staff.setStaffId(staff_id);
+    staff.setName(name);
+    staff.setFilePath(file_path);
+    staff.setUpdateTime(Custom::currentDateTime());
+    if (staff_.empty()) {
+        mp.insert(staff);
+    } else {
+        std::vector<std::string> update_col_names;
+        update_col_names.emplace_back("update_time");
+        mp.updateBy(update_col_names, Criteria(Staff::Cols::_staff_id, CompareOperator::EQ, staff_id),
+                    Custom::currentDateTime());
+    }
+}
+
+
+void db_to_json_file() {
+    Json::Value root;
+    auto clientPtr = drogon::app().getDbClient();
+    Mapper<Staff> mp(clientPtr);
+    auto staffs = mp.findAll();
+    for (auto &staff: staffs) {
+        root.append(staff.toJson());
+    }
+    Json::StreamWriterBuilder builder;
+    const std::string json_file = Json::writeString(builder, root);
+    std::ofstream ofs;
+    ofs.open("facelib/facelib_1.json");
+    ofs << json_file;
+    ofs.close();
+}
 
 void
 AttendInfo::add_face_libs(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
 
-
+    MultiPartParser fileUpload;
+    fileUpload.parse(req);
+    Json::Value root, sub;
+    auto clientPtr = drogon::app().getDbClient();
+    Mapper<Staff> mp(clientPtr);
+    for (auto &file: fileUpload.getFiles()) {
+        sub["staff_id"] = "";
+        sub["name"] = "";
+        sub["file_path"] = "";
+        sub["message"] = "";
+        auto file_name = file.getFileName();
+        auto staff_info = drogon::utils::splitString(file_name, "_");
+        if (staff_info.size() >= 2) {
+            if (file.getFileExtension() == "jpg") {
+                auto staff_id = staff_info[0];
+                auto name = drogon::utils::splitString(staff_info[1], ".")[0];
+                auto file_path = std::string("./face/").append(staff_id).append(".jpg");
+                sub["staff_id"] = staff_id;
+                sub["name"] = name;
+                sub["file_path"] = file_path;
+                try {
+                    file.saveAs(file_path);
+                    save_face_info(sub);
+                    sub["message"] = "file upload successfully!";
+                }
+                catch (std::exception &e) {
+                    sub["message"] = "file save failed.";
+                }
+            } else {
+                sub["message"] = "file's extension must be '.jpg'.";
+            }
+        } else {
+            sub["message"] = "file name must like 'staffid_name.jpg'.";
+        }
+        root.append(sub);
+    }
+    //save staff info into sqlite3
+    db_to_json_file();
+    auto resp = HttpResponse::newHttpJsonResponse(root);
+    callback(resp);
 }
+
 
 void
 AttendInfo::get_attend_infos(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
@@ -31,5 +111,43 @@ AttendInfo::get_attend_infos(const HttpRequestPtr &req, std::function<void(const
         root.append(sub);
     }
     auto resp = HttpResponse::newHttpJsonResponse(root);
+    callback(resp);
+}
+
+void AttendInfo::delete_face(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+
+    auto resp = HttpResponse::newHttpResponse();
+    auto staff_info = req->getJsonObject();
+    std::string staff_id = (*staff_info)["staff_id"].asString();
+    auto clientPtr = drogon::app().getDbClient();
+    Mapper<Staff> mp(clientPtr);
+    auto staff = mp.findOne(Criteria(Staff::Cols::_staff_id, CompareOperator::EQ, staff_id));
+    //delete face_img
+    if (0 == remove(staff.getFilePath()->data())) {
+        //delete face_info_db
+        mp.deleteBy(Criteria(Staff::Cols::_staff_id, CompareOperator::EQ, staff_id));
+        //update json file
+        db_to_json_file();
+        resp->setStatusCode(drogon::k200OK);
+        resp->setBody("删除成功");
+    } else {
+        resp->setStatusCode(drogon::k403Forbidden);
+        resp->setBody("删除失败");
+    }
+    callback(resp);
+}
+
+void
+AttendInfo::download_img(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+
+    auto resp = HttpResponse::newHttpResponse();
+    auto staff_info = req->getJsonObject();
+    std::string staff_id = (*staff_info)["staff_id"].asString();
+    auto clientPtr = drogon::app().getDbClient();
+    Mapper<Staff> mp(clientPtr);
+    auto staff = mp.findOne(Criteria(Staff::Cols::_staff_id, CompareOperator::EQ, staff_id));
+    //delete face_img
+    auto file_path = staff.getFilePath()->data();
+
     callback(resp);
 }

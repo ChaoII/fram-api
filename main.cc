@@ -12,7 +12,7 @@ int main() {
         drogon::Custom::update_time("172.168.100.79:8112", "/api/services/assistant/UserConfig/GetNow");
     }
 
-    trantor::Logger::setLogLevel(trantor::Logger::kTrace);
+//    trantor::Logger::setLogLevel(trantor::Logger::kTrace);
     //drogon web
     {
         //Load config file

@@ -6,7 +6,7 @@
 
 using namespace drogon;
 
-void Custom::update_time(const std::string host, const std::string &api_path) {
+void Custom::update_time(const std::string &host, const std::string &api_path) {
 
     auto client = HttpClient::newHttpClient(host);
     auto req = HttpRequest::newHttpRequest();
@@ -34,4 +34,17 @@ void Custom::update_time(const std::string host, const std::string &api_path) {
                 spdlog::warn("your operator system is not linux,ony linux the datetime update is needed.")
 #endif
             });
+}
+
+
+// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+std::string Custom::currentDateTime() {
+    time_t now = time(nullptr);
+    struct tm t_struct{};
+    char buf[80];
+    t_struct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y-%m-%d %X", &t_struct);
+    return buf;
 }

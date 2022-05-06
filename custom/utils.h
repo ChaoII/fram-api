@@ -7,6 +7,7 @@
 
 #include <drogon/drogon.h>
 #include <spdlog/spdlog.h>
+#include <ctime>
 
 namespace drogon {
 
@@ -15,8 +16,9 @@ namespace drogon {
     public:
         Custom() = default;
 
-        void static update_time(const std::string host, const std::string &api_path);
+        void static update_time(const std::string &host, const std::string &api_path);
 
+        static std::string currentDateTime();
     };
 }
 

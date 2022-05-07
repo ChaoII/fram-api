@@ -19,6 +19,8 @@ namespace drogon {
         void static update_time(const std::string &host, const std::string &api_path);
 
         static std::string currentDateTime();
+
+        static std::string time_delta(int d = 7, int h = 0, int m = 0, int s = 0);
     };
 }
 

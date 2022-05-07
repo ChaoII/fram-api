@@ -48,3 +48,17 @@ std::string Custom::currentDateTime() {
     strftime(buf, sizeof(buf), "%Y-%m-%d %X", &t_struct);
     return buf;
 }
+
+std::string Custom::time_delta(int d, int h, int m, int s) {
+    time_t now = time(nullptr);
+    now += d * 24 * 60 * 60 + h * 60 * 60 + m * 60 + s;
+    struct tm t_struct{};
+    char buf[80];
+    t_struct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y-%m-%d %X", &t_struct);
+    return buf;
+
+
+}

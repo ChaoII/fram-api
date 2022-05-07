@@ -80,6 +80,7 @@ AttendInfo::add_face_libs(const HttpRequestPtr &req, std::function<void(const Ht
                 sub["message"] = "file's extension must be '.jpg'.";
             }
         } else {
+            sub["file_path"] = file_name;
             sub["message"] = "file name must like 'staffid_name.jpg'.";
         }
         root.append(sub);
@@ -140,7 +141,6 @@ void AttendInfo::delete_face(const HttpRequestPtr &req, std::function<void(const
 void
 AttendInfo::download_img(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
 
-    auto resp = HttpResponse::newHttpResponse();
     auto staff_info = req->getJsonObject();
     std::string staff_id = (*staff_info)["staff_id"].asString();
     auto clientPtr = drogon::app().getDbClient();
@@ -148,6 +148,41 @@ AttendInfo::download_img(const HttpRequestPtr &req, std::function<void(const Htt
     auto staff = mp.findOne(Criteria(Staff::Cols::_staff_id, CompareOperator::EQ, staff_id));
     //delete face_img
     auto file_path = staff.getFilePath()->data();
+    auto resp = HttpResponse::newFileResponse(file_path);
 
     callback(resp);
 }
+
+void AttendInfo::clear_data(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+    std::string start_time;
+    std::string end_time;
+    auto resp = HttpResponse::newHttpResponse();
+    try {
+        auto time_obj = req->getJsonObject();
+        if (time_obj->empty()) {
+            start_time = Custom::time_delta(-30000);
+            end_time = Custom::time_delta(-7);
+        } else {
+            start_time = (*time_obj)["start_time"].asString();
+            end_time = (*time_obj)["end_time"].asString();
+        }
+        auto clientPtr = drogon::app().getDbClient();
+        Mapper<Attend> mp(clientPtr);
+        mp.deleteBy((Criteria(Attend::Cols::_attend_time, CompareOperator::GE, start_time) &&
+                     Criteria(Attend::Cols::_attend_time, CompareOperator::LE, end_time)));
+
+        resp->setBody("数据清除成功");
+        callback(resp);
+    }
+    catch (std::exception &e) {
+        resp->setStatusCode(drogon::k500InternalServerError);
+        resp->setBody("数据请求错误，请添加json请求体");
+        callback(resp);
+    }
+}
+
+void AttendInfo::update_time(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+
+}
+
+

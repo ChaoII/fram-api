@@ -16,7 +16,8 @@ namespace drogon {
     public:
         Custom() = default;
 
-        void static update_time(const std::string &host, const std::string &api_path);
+        static bool update_time(const std::string &host = "172.168.100.79:8112",
+                                const std::string &api_path = "/api/services/assistant/UserConfig/GetNow");
 
         static std::string currentDateTime();
 

@@ -38,10 +38,10 @@ void db_to_json_file() {
         root.append(staff.toJson());
     }
     Json::StreamWriterBuilder builder;
-    const std::string json_file = Json::writeString(builder, root);
+    const std::string json_str = Json::writeString(builder, root);
     std::ofstream ofs;
     ofs.open("facelib/facelib_1.json");
-    ofs << json_file;
+    ofs << json_str;
     ofs.close();
 }
 
@@ -58,13 +58,13 @@ AttendInfo::add_face_libs(const HttpRequestPtr &req, std::function<void(const Ht
         sub["name"] = "";
         sub["file_path"] = "";
         sub["message"] = "";
-        auto file_name = file.getFileName();
+        const std::string &file_name = file.getFileName();
         auto staff_info = drogon::utils::splitString(file_name, "_");
         if (staff_info.size() >= 2) {
             if (file.getFileExtension() == "jpg") {
                 auto staff_id = staff_info[0];
                 auto name = drogon::utils::splitString(staff_info[1], ".")[0];
-                auto file_path = std::string("./face/").append(staff_id).append(".jpg");
+                auto file_path = std::string("./facelib/").append(staff_id).append(".jpg");
                 sub["staff_id"] = staff_id;
                 sub["name"] = name;
                 sub["file_path"] = file_path;
@@ -182,6 +182,17 @@ void AttendInfo::clear_data(const HttpRequestPtr &req, std::function<void(const 
 }
 
 void AttendInfo::update_time(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+
+    bool ret = Custom::update_time();
+    auto resp = HttpResponse::newHttpResponse();
+    if (ret) {
+        resp->setStatusCode(drogon::k200OK);
+        resp->setBody("success");
+    } else {
+        resp->setStatusCode(drogon::k408RequestTimeout);
+        resp->setBody("failed，时间同步接口访问超时ß");
+    }
+    callback(resp);
 
 }
 

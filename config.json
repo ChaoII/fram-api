@@ -105,7 +105,7 @@
     "session_timeout": 0,
     //document_root: Root path of HTTP document, defaut path is ./
     "document_root": "./",
-    //home_page: Set the HTML file of the home page, the default value is "index.html"
+    //home_page: Set the HTML file of the home page, the default value is "dashboard.csp"
     //If there isn't any handler registered to the path "/", the home page file in the "document_root" is send to clients as a response
     //to the request for "/".
     "home_page": "index.html",
@@ -142,7 +142,12 @@
       "xap",
       "apk",
       "cur",
-      "xml"
+      "xml",
+      "woff2",
+      "eot",
+      "ttf",
+      "svg",
+      "map"
     ],
     //locations: An array of locations of static files for GET requests.
     "locations": [

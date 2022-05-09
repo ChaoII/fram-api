@@ -10,16 +10,16 @@
 
 using namespace drogon;
 
-class AttendInfo : public drogon::HttpController<AttendInfo> {
+class api : public drogon::HttpController<api> {
 public:
     METHOD_LIST_BEGIN
         // use METHOD_ADD to add your custom processing function here;
-        ADD_METHOD_TO(AttendInfo::add_face_libs, "/api/add_face_libs", Put);
-        ADD_METHOD_TO(AttendInfo::get_attend_infos, "/api/get_attend_infos", Post);
-        ADD_METHOD_TO(AttendInfo::delete_face, "/api/delete_face", Delete);
-        ADD_METHOD_TO(AttendInfo::download_img, "/api/download_img", Post);
-        ADD_METHOD_TO(AttendInfo::clear_data, "/api/clear_data", Delete);
-        ADD_METHOD_TO(AttendInfo::update_time, "/api/update_time", Get);
+        ADD_METHOD_TO(api::add_face_libs, "/api/add_face_libs", Put);
+        ADD_METHOD_TO(api::get_attend_infos, "/api/get_attend_infos", Post);
+        ADD_METHOD_TO(api::delete_face, "/api/delete_face", Delete);
+        ADD_METHOD_TO(api::download_img, "/api/download_img", Post);
+        ADD_METHOD_TO(api::clear_data, "/api/clear_data", Delete);
+        ADD_METHOD_TO(api::update_time, "/api/update_time", Get);
     METHOD_LIST_END
 
     // your declaration of processing function maybe like this:

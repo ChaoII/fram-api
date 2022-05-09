@@ -1,4 +1,4 @@
-#include "AttendInfo.h"
+#include "api.h"
 
 using namespace drogon::orm;
 
@@ -30,6 +30,7 @@ void save_face_info(Json::Value &staff_info) {
 
 
 void db_to_json_file() {
+
     Json::Value root;
     auto clientPtr = drogon::app().getDbClient();
     Mapper<Staff> mp(clientPtr);
@@ -40,13 +41,13 @@ void db_to_json_file() {
     Json::StreamWriterBuilder builder;
     const std::string json_str = Json::writeString(builder, root);
     std::ofstream ofs;
-    ofs.open("facelib/facelib_1.json");
+    ofs.open("./static/facelib/facelib.json");
     ofs << json_str;
     ofs.close();
 }
 
 void
-AttendInfo::add_face_libs(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+api::add_face_libs(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
 
     MultiPartParser fileUpload;
     fileUpload.parse(req);
@@ -64,7 +65,7 @@ AttendInfo::add_face_libs(const HttpRequestPtr &req, std::function<void(const Ht
             if (file.getFileExtension() == "jpg") {
                 auto staff_id = staff_info[0];
                 auto name = drogon::utils::splitString(staff_info[1], ".")[0];
-                auto file_path = std::string("./facelib/").append(staff_id).append(".jpg");
+                auto file_path = std::string("./static/facelib/").append(staff_id).append(".jpg");
                 sub["staff_id"] = staff_id;
                 sub["name"] = name;
                 sub["file_path"] = file_path;
@@ -93,7 +94,7 @@ AttendInfo::add_face_libs(const HttpRequestPtr &req, std::function<void(const Ht
 
 
 void
-AttendInfo::get_attend_infos(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+api::get_attend_infos(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
 
     auto time_obj = req->getJsonObject();
     std::string start_time = (*time_obj)["start_time"].asString();
@@ -115,7 +116,7 @@ AttendInfo::get_attend_infos(const HttpRequestPtr &req, std::function<void(const
     callback(resp);
 }
 
-void AttendInfo::delete_face(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+void api::delete_face(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
 
     auto resp = HttpResponse::newHttpResponse();
     auto staff_info = req->getJsonObject();
@@ -139,7 +140,7 @@ void AttendInfo::delete_face(const HttpRequestPtr &req, std::function<void(const
 }
 
 void
-AttendInfo::download_img(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+api::download_img(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
 
     auto staff_info = req->getJsonObject();
     std::string staff_id = (*staff_info)["staff_id"].asString();
@@ -153,7 +154,7 @@ AttendInfo::download_img(const HttpRequestPtr &req, std::function<void(const Htt
     callback(resp);
 }
 
-void AttendInfo::clear_data(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+void api::clear_data(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
     std::string start_time;
     std::string end_time;
     auto resp = HttpResponse::newHttpResponse();
@@ -181,7 +182,7 @@ void AttendInfo::clear_data(const HttpRequestPtr &req, std::function<void(const 
     }
 }
 
-void AttendInfo::update_time(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+void api::update_time(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
 
     bool ret = Custom::update_time();
     auto resp = HttpResponse::newHttpResponse();

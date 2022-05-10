@@ -160,6 +160,12 @@ void api::clear_data(const HttpRequestPtr &req, std::function<void(const HttpRes
     auto resp = HttpResponse::newHttpResponse();
     try {
         auto time_obj = req->getJsonObject();
+        if (time_obj == nullptr) {
+            resp->setBody("请传入正确的json对象，{}被允许");
+            resp->setStatusCode(k400BadRequest);
+            callback(resp);
+            return;
+        }
         if (time_obj->empty()) {
             start_time = Custom::time_delta(-30000);
             end_time = Custom::time_delta(-7);
@@ -172,12 +178,13 @@ void api::clear_data(const HttpRequestPtr &req, std::function<void(const HttpRes
         mp.deleteBy((Criteria(Attend::Cols::_attend_time, CompareOperator::GE, start_time) &&
                      Criteria(Attend::Cols::_attend_time, CompareOperator::LE, end_time)));
 
+        resp->setStatusCode(k200OK);
         resp->setBody("数据清除成功");
         callback(resp);
     }
     catch (std::exception &e) {
         resp->setStatusCode(drogon::k500InternalServerError);
-        resp->setBody("数据请求错误，请添加json请求体");
+        resp->setBody(std::string("数据清除错误") + e.what());
         callback(resp);
     }
 }

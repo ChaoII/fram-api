@@ -13,7 +13,7 @@
 
 <body style="height: 100%; overflow:hidden">
 
-<div style="height: 40px;width: 100%;padding: 10px 0 0 20px;margin-bottom: 20px">
+<div style="height: 40px;width: 100%;padding: 10px 40px 0 20px;margin-bottom: 20px">
 
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">
         <span class="glyphicon glyphicon-plus"></span>新增人脸
@@ -79,6 +79,10 @@
         </div>
     </div>
 
+        <button type="button" class="btn btn-primary" onclick="update_library()"  style="float: right">
+            <span class="glyphicon glyphicon-refresh"></span>更新人脸库
+        </button>
+
 
 </div>
 
@@ -140,6 +144,21 @@
         $("#update_time").html(date.toLocaleString())
     });
 
+    function update_library() {
+
+        $.ajax({
+            url: "/api/update_library",
+            type: "get",
+            success: function (msg) {
+                alert("更新成功！");
+            },
+            error: function (msg) {
+                console.log(msg);
+                alert("更新失败！");
+
+            }
+        })
+    }
     function uploadface() {
         let form_data = new FormData();
         //用js取就有问题

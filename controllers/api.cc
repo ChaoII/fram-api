@@ -205,3 +205,21 @@ void api::update_time(const HttpRequestPtr &req, std::function<void(const HttpRe
 }
 
 
+void api::restart_frame(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+    auto resp = HttpResponse::newHttpResponse();
+
+#if __LINUX__
+    system("ps aux | grep main.py | awk '{print $2}' | xargs kill -9");
+    resp->setStatusCode(drogon::k200OK);
+    resp->setBody("更新成功");
+#elif __APPLE__
+    resp->setStatusCode(drogon::k200OK);
+    resp->setBody("this is apple group which has been unsupported this program");
+    LOG_WARN << "this is apple group which has been unsupported this program";
+#else
+    resp->setStatusCode(drogon::k400BadRequest);
+    resp->setBody("tplease check your operate system");
+    LOG_WARN<<"please check your operate system";
+#endif
+    callback(resp);
+}

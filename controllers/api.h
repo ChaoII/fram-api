@@ -20,6 +20,7 @@ public:
         ADD_METHOD_TO(api::download_img, "/api/download_img", Post);
         ADD_METHOD_TO(api::clear_data, "/api/clear_data", Delete);
         ADD_METHOD_TO(api::update_time, "/api/update_time", Get);
+        ADD_METHOD_TO(api::restart_frame, "/api/update_library", Get);
     METHOD_LIST_END
 
     // your declaration of processing function maybe like this:
@@ -35,4 +36,6 @@ public:
     void clear_data(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
 
     void update_time(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
+
+    void restart_frame(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
 };

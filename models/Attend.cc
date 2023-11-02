@@ -14,8 +14,9 @@ using namespace drogon::orm;
 using namespace drogon_model::sqlite3;
 
 const std::string Attend::Cols::_id = "id";
-const std::string Attend::Cols::_staff_id = "staff_id";
+const std::string Attend::Cols::_uid = "uid";
 const std::string Attend::Cols::_name = "name";
+const std::string Attend::Cols::_pic_url = "pic_url";
 const std::string Attend::Cols::_attend_time = "attend_time";
 const std::string Attend::primaryKeyName = "id";
 const bool Attend::hasPrimaryKey = true;
@@ -23,9 +24,10 @@ const std::string Attend::tableName = "attend";
 
 const std::vector<typename Attend::MetaData> Attend::metaData_={
 {"id","uint64_t","integer",8,1,1,1},
-{"staff_id","std::string","text",0,0,0,1},
-{"name","std::string","text",0,0,0,1},
-{"attend_time","std::string","text",0,0,0,1}
+{"uid","std::string","text",0,0,0,0},
+{"name","std::string","text",0,0,0,0},
+{"pic_url","std::string","text",0,0,0,0},
+{"attend_time","std::string","text",0,0,0,0}
 };
 const std::string &Attend::getColumnName(size_t index) noexcept(false)
 {
@@ -40,13 +42,17 @@ Attend::Attend(const Row &r, const ssize_t indexOffset) noexcept
         {
             id_=std::make_shared<uint64_t>(r["id"].as<uint64_t>());
         }
-        if(!r["staff_id"].isNull())
+        if(!r["uid"].isNull())
         {
-            staffId_=std::make_shared<std::string>(r["staff_id"].as<std::string>());
+            uid_=std::make_shared<std::string>(r["uid"].as<std::string>());
         }
         if(!r["name"].isNull())
         {
             name_=std::make_shared<std::string>(r["name"].as<std::string>());
+        }
+        if(!r["pic_url"].isNull())
+        {
+            picUrl_=std::make_shared<std::string>(r["pic_url"].as<std::string>());
         }
         if(!r["attend_time"].isNull())
         {
@@ -56,7 +62,7 @@ Attend::Attend(const Row &r, const ssize_t indexOffset) noexcept
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 4 > r.size())
+        if(offset + 5 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -70,7 +76,7 @@ Attend::Attend(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 1;
         if(!r[index].isNull())
         {
-            staffId_=std::make_shared<std::string>(r[index].as<std::string>());
+            uid_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 2;
         if(!r[index].isNull())
@@ -78,6 +84,11 @@ Attend::Attend(const Row &r, const ssize_t indexOffset) noexcept
             name_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 3;
+        if(!r[index].isNull())
+        {
+            picUrl_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 4;
         if(!r[index].isNull())
         {
             attendTime_=std::make_shared<std::string>(r[index].as<std::string>());
@@ -88,7 +99,7 @@ Attend::Attend(const Row &r, const ssize_t indexOffset) noexcept
 
 Attend::Attend(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 4)
+    if(pMasqueradingVector.size() != 5)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -106,7 +117,7 @@ Attend::Attend(const Json::Value &pJson, const std::vector<std::string> &pMasque
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            staffId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            uid_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -122,7 +133,15 @@ Attend::Attend(const Json::Value &pJson, const std::vector<std::string> &pMasque
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            attendTime_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            picUrl_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+        }
+    }
+    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    {
+        dirtyFlag_[4] = true;
+        if(!pJson[pMasqueradingVector[4]].isNull())
+        {
+            attendTime_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
         }
     }
 }
@@ -137,12 +156,12 @@ Attend::Attend(const Json::Value &pJson) noexcept(false)
             id_=std::make_shared<uint64_t>((uint64_t)pJson["id"].asUInt64());
         }
     }
-    if(pJson.isMember("staff_id"))
+    if(pJson.isMember("uid"))
     {
         dirtyFlag_[1]=true;
-        if(!pJson["staff_id"].isNull())
+        if(!pJson["uid"].isNull())
         {
-            staffId_=std::make_shared<std::string>(pJson["staff_id"].asString());
+            uid_=std::make_shared<std::string>(pJson["uid"].asString());
         }
     }
     if(pJson.isMember("name"))
@@ -153,9 +172,17 @@ Attend::Attend(const Json::Value &pJson) noexcept(false)
             name_=std::make_shared<std::string>(pJson["name"].asString());
         }
     }
-    if(pJson.isMember("attend_time"))
+    if(pJson.isMember("pic_url"))
     {
         dirtyFlag_[3]=true;
+        if(!pJson["pic_url"].isNull())
+        {
+            picUrl_=std::make_shared<std::string>(pJson["pic_url"].asString());
+        }
+    }
+    if(pJson.isMember("attend_time"))
+    {
+        dirtyFlag_[4]=true;
         if(!pJson["attend_time"].isNull())
         {
             attendTime_=std::make_shared<std::string>(pJson["attend_time"].asString());
@@ -166,7 +193,7 @@ Attend::Attend(const Json::Value &pJson) noexcept(false)
 void Attend::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 4)
+    if(pMasqueradingVector.size() != 5)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -183,7 +210,7 @@ void Attend::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            staffId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            uid_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -199,7 +226,15 @@ void Attend::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            attendTime_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            picUrl_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+        }
+    }
+    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    {
+        dirtyFlag_[4] = true;
+        if(!pJson[pMasqueradingVector[4]].isNull())
+        {
+            attendTime_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
         }
     }
 }
@@ -213,12 +248,12 @@ void Attend::updateByJson(const Json::Value &pJson) noexcept(false)
             id_=std::make_shared<uint64_t>((uint64_t)pJson["id"].asUInt64());
         }
     }
-    if(pJson.isMember("staff_id"))
+    if(pJson.isMember("uid"))
     {
         dirtyFlag_[1] = true;
-        if(!pJson["staff_id"].isNull())
+        if(!pJson["uid"].isNull())
         {
-            staffId_=std::make_shared<std::string>(pJson["staff_id"].asString());
+            uid_=std::make_shared<std::string>(pJson["uid"].asString());
         }
     }
     if(pJson.isMember("name"))
@@ -229,9 +264,17 @@ void Attend::updateByJson(const Json::Value &pJson) noexcept(false)
             name_=std::make_shared<std::string>(pJson["name"].asString());
         }
     }
-    if(pJson.isMember("attend_time"))
+    if(pJson.isMember("pic_url"))
     {
         dirtyFlag_[3] = true;
+        if(!pJson["pic_url"].isNull())
+        {
+            picUrl_=std::make_shared<std::string>(pJson["pic_url"].asString());
+        }
+    }
+    if(pJson.isMember("attend_time"))
+    {
+        dirtyFlag_[4] = true;
         if(!pJson["attend_time"].isNull())
         {
             attendTime_=std::make_shared<std::string>(pJson["attend_time"].asString());
@@ -261,25 +304,30 @@ const typename Attend::PrimaryKeyType & Attend::getPrimaryKey() const
     return *id_;
 }
 
-const std::string &Attend::getValueOfStaffId() const noexcept
+const std::string &Attend::getValueOfUid() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if(staffId_)
-        return *staffId_;
+    if(uid_)
+        return *uid_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Attend::getStaffId() const noexcept
+const std::shared_ptr<std::string> &Attend::getUid() const noexcept
 {
-    return staffId_;
+    return uid_;
 }
-void Attend::setStaffId(const std::string &pStaffId) noexcept
+void Attend::setUid(const std::string &pUid) noexcept
 {
-    staffId_ = std::make_shared<std::string>(pStaffId);
+    uid_ = std::make_shared<std::string>(pUid);
     dirtyFlag_[1] = true;
 }
-void Attend::setStaffId(std::string &&pStaffId) noexcept
+void Attend::setUid(std::string &&pUid) noexcept
 {
-    staffId_ = std::make_shared<std::string>(std::move(pStaffId));
+    uid_ = std::make_shared<std::string>(std::move(pUid));
+    dirtyFlag_[1] = true;
+}
+void Attend::setUidToNull() noexcept
+{
+    uid_.reset();
     dirtyFlag_[1] = true;
 }
 
@@ -304,6 +352,38 @@ void Attend::setName(std::string &&pName) noexcept
     name_ = std::make_shared<std::string>(std::move(pName));
     dirtyFlag_[2] = true;
 }
+void Attend::setNameToNull() noexcept
+{
+    name_.reset();
+    dirtyFlag_[2] = true;
+}
+
+const std::string &Attend::getValueOfPicUrl() const noexcept
+{
+    const static std::string defaultValue = std::string();
+    if(picUrl_)
+        return *picUrl_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Attend::getPicUrl() const noexcept
+{
+    return picUrl_;
+}
+void Attend::setPicUrl(const std::string &pPicUrl) noexcept
+{
+    picUrl_ = std::make_shared<std::string>(pPicUrl);
+    dirtyFlag_[3] = true;
+}
+void Attend::setPicUrl(std::string &&pPicUrl) noexcept
+{
+    picUrl_ = std::make_shared<std::string>(std::move(pPicUrl));
+    dirtyFlag_[3] = true;
+}
+void Attend::setPicUrlToNull() noexcept
+{
+    picUrl_.reset();
+    dirtyFlag_[3] = true;
+}
 
 const std::string &Attend::getValueOfAttendTime() const noexcept
 {
@@ -319,12 +399,17 @@ const std::shared_ptr<std::string> &Attend::getAttendTime() const noexcept
 void Attend::setAttendTime(const std::string &pAttendTime) noexcept
 {
     attendTime_ = std::make_shared<std::string>(pAttendTime);
-    dirtyFlag_[3] = true;
+    dirtyFlag_[4] = true;
 }
 void Attend::setAttendTime(std::string &&pAttendTime) noexcept
 {
     attendTime_ = std::make_shared<std::string>(std::move(pAttendTime));
-    dirtyFlag_[3] = true;
+    dirtyFlag_[4] = true;
+}
+void Attend::setAttendTimeToNull() noexcept
+{
+    attendTime_.reset();
+    dirtyFlag_[4] = true;
 }
 
 void Attend::updateId(const uint64_t id)
@@ -335,8 +420,9 @@ void Attend::updateId(const uint64_t id)
 const std::vector<std::string> &Attend::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
-        "staff_id",
+        "uid",
         "name",
+        "pic_url",
         "attend_time"
     };
     return inCols;
@@ -346,9 +432,9 @@ void Attend::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[1])
     {
-        if(getStaffId())
+        if(getUid())
         {
-            binder << getValueOfStaffId();
+            binder << getValueOfUid();
         }
         else
         {
@@ -367,6 +453,17 @@ void Attend::outputArgs(drogon::orm::internal::SqlBinder &binder) const
         }
     }
     if(dirtyFlag_[3])
+    {
+        if(getPicUrl())
+        {
+            binder << getValueOfPicUrl();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[4])
     {
         if(getAttendTime())
         {
@@ -394,6 +491,10 @@ const std::vector<std::string> Attend::updateColumns() const
     {
         ret.push_back(getColumnName(3));
     }
+    if(dirtyFlag_[4])
+    {
+        ret.push_back(getColumnName(4));
+    }
     return ret;
 }
 
@@ -401,9 +502,9 @@ void Attend::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[1])
     {
-        if(getStaffId())
+        if(getUid())
         {
-            binder << getValueOfStaffId();
+            binder << getValueOfUid();
         }
         else
         {
@@ -422,6 +523,17 @@ void Attend::updateArgs(drogon::orm::internal::SqlBinder &binder) const
         }
     }
     if(dirtyFlag_[3])
+    {
+        if(getPicUrl())
+        {
+            binder << getValueOfPicUrl();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[4])
     {
         if(getAttendTime())
         {
@@ -444,13 +556,13 @@ Json::Value Attend::toJson() const
     {
         ret["id"]=Json::Value();
     }
-    if(getStaffId())
+    if(getUid())
     {
-        ret["staff_id"]=getValueOfStaffId();
+        ret["uid"]=getValueOfUid();
     }
     else
     {
-        ret["staff_id"]=Json::Value();
+        ret["uid"]=Json::Value();
     }
     if(getName())
     {
@@ -459,6 +571,14 @@ Json::Value Attend::toJson() const
     else
     {
         ret["name"]=Json::Value();
+    }
+    if(getPicUrl())
+    {
+        ret["pic_url"]=getValueOfPicUrl();
+    }
+    else
+    {
+        ret["pic_url"]=Json::Value();
     }
     if(getAttendTime())
     {
@@ -475,7 +595,7 @@ Json::Value Attend::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 4)
+    if(pMasqueradingVector.size() == 5)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -490,9 +610,9 @@ Json::Value Attend::toMasqueradedJson(
         }
         if(!pMasqueradingVector[1].empty())
         {
-            if(getStaffId())
+            if(getUid())
             {
-                ret[pMasqueradingVector[1]]=getValueOfStaffId();
+                ret[pMasqueradingVector[1]]=getValueOfUid();
             }
             else
             {
@@ -512,13 +632,24 @@ Json::Value Attend::toMasqueradedJson(
         }
         if(!pMasqueradingVector[3].empty())
         {
-            if(getAttendTime())
+            if(getPicUrl())
             {
-                ret[pMasqueradingVector[3]]=getValueOfAttendTime();
+                ret[pMasqueradingVector[3]]=getValueOfPicUrl();
             }
             else
             {
                 ret[pMasqueradingVector[3]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[4].empty())
+        {
+            if(getAttendTime())
+            {
+                ret[pMasqueradingVector[4]]=getValueOfAttendTime();
+            }
+            else
+            {
+                ret[pMasqueradingVector[4]]=Json::Value();
             }
         }
         return ret;
@@ -532,13 +663,13 @@ Json::Value Attend::toMasqueradedJson(
     {
         ret["id"]=Json::Value();
     }
-    if(getStaffId())
+    if(getUid())
     {
-        ret["staff_id"]=getValueOfStaffId();
+        ret["uid"]=getValueOfUid();
     }
     else
     {
-        ret["staff_id"]=Json::Value();
+        ret["uid"]=Json::Value();
     }
     if(getName())
     {
@@ -547,6 +678,14 @@ Json::Value Attend::toMasqueradedJson(
     else
     {
         ret["name"]=Json::Value();
+    }
+    if(getPicUrl())
+    {
+        ret["pic_url"]=getValueOfPicUrl();
+    }
+    else
+    {
+        ret["pic_url"]=Json::Value();
     }
     if(getAttendTime())
     {
@@ -566,29 +705,24 @@ bool Attend::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
-    if(pJson.isMember("staff_id"))
+    if(pJson.isMember("uid"))
     {
-        if(!validJsonOfField(1, "staff_id", pJson["staff_id"], err, true))
+        if(!validJsonOfField(1, "uid", pJson["uid"], err, true))
             return false;
-    }
-    else
-    {
-        err="The staff_id column cannot be null";
-        return false;
     }
     if(pJson.isMember("name"))
     {
         if(!validJsonOfField(2, "name", pJson["name"], err, true))
             return false;
     }
-    else
+    if(pJson.isMember("pic_url"))
     {
-        err="The name column cannot be null";
-        return false;
+        if(!validJsonOfField(3, "pic_url", pJson["pic_url"], err, true))
+            return false;
     }
     if(pJson.isMember("attend_time"))
     {
-        if(!validJsonOfField(3, "attend_time", pJson["attend_time"], err, true))
+        if(!validJsonOfField(4, "attend_time", pJson["attend_time"], err, true))
             return false;
     }
     return true;
@@ -597,7 +731,7 @@ bool Attend::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                 const std::vector<std::string> &pMasqueradingVector,
                                                 std::string &err)
 {
-    if(pMasqueradingVector.size() != 4)
+    if(pMasqueradingVector.size() != 5)
     {
         err = "Bad masquerading vector";
         return false;
@@ -618,11 +752,6 @@ bool Attend::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[1] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[2].empty())
       {
@@ -631,17 +760,20 @@ bool Attend::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[2] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[3].empty())
       {
           if(pJson.isMember(pMasqueradingVector[3]))
           {
               if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[4].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[4]))
+          {
+              if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true))
                   return false;
           }
       }
@@ -665,9 +797,9 @@ bool Attend::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
-    if(pJson.isMember("staff_id"))
+    if(pJson.isMember("uid"))
     {
-        if(!validJsonOfField(1, "staff_id", pJson["staff_id"], err, false))
+        if(!validJsonOfField(1, "uid", pJson["uid"], err, false))
             return false;
     }
     if(pJson.isMember("name"))
@@ -675,9 +807,14 @@ bool Attend::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(2, "name", pJson["name"], err, false))
             return false;
     }
+    if(pJson.isMember("pic_url"))
+    {
+        if(!validJsonOfField(3, "pic_url", pJson["pic_url"], err, false))
+            return false;
+    }
     if(pJson.isMember("attend_time"))
     {
-        if(!validJsonOfField(3, "attend_time", pJson["attend_time"], err, false))
+        if(!validJsonOfField(4, "attend_time", pJson["attend_time"], err, false))
             return false;
     }
     return true;
@@ -686,7 +823,7 @@ bool Attend::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                               const std::vector<std::string> &pMasqueradingVector,
                                               std::string &err)
 {
-    if(pMasqueradingVector.size() != 4)
+    if(pMasqueradingVector.size() != 5)
     {
         err = "Bad masquerading vector";
         return false;
@@ -715,6 +852,11 @@ bool Attend::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
       if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
       {
           if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+      {
+          if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, false))
               return false;
       }
     }
@@ -753,8 +895,7 @@ bool Attend::validJsonOfField(size_t index,
         case 1:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -765,8 +906,7 @@ bool Attend::validJsonOfField(size_t index,
         case 2:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -777,8 +917,18 @@ bool Attend::validJsonOfField(size_t index,
         case 3:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
+                return true;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
                 return false;
+            }
+            break;
+        case 4:
+            if(pJson.isNull())
+            {
+                return true;
             }
             if(!pJson.isString())
             {
@@ -789,7 +939,6 @@ bool Attend::validJsonOfField(size_t index,
         default:
             err="Internal error in the server";
             return false;
-            break;
     }
     return true;
 }

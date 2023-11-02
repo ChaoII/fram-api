@@ -6,53 +6,130 @@
 
 using namespace drogon;
 
-bool Custom::update_time(const std::string &host, const std::string &api_path) {
+uint64_t Custom::get_uuid() {
+    return Snowflake(0).NextId();
+}
 
-    auto client = HttpClient::newHttpClient(host);
-    auto req = HttpRequest::newHttpRequest();
-    req->setPath(api_path);
-    req->setMethod(drogon::Post);
-    req->setContentTypeCode(ContentType::CT_APPLICATION_JSON);
-    req->setBody("{}");
-    auto ret = client->sendRequest(req);
-    if (ret.first != ReqResult::Ok) {
-        return false;
+
+/**
+ * 字符串替换函数
+ * #function name   : replace_str()
+ * #param str       : 操作之前的字符串
+ * #param before    : 将要被替换的字符串
+ * #param after     : 替换目标字符串
+ * #return          : void
+ */
+void Custom::replace_str(std::string &str, const std::string &before, const std::string &after) {
+    for (std::string::size_type pos(0); pos != std::string::npos; pos += after.length()) {
+        pos = str.find(before, pos);
+        if (pos != std::string::npos)
+            str.replace(pos, before.length(), after);
+        else
+            break;
     }
-    Json::Reader reader;
-    Json::Value root;
-    reader.parse(std::string(ret.second->getBody()), root);
+}
 
-#ifdef __linux__
-    system((std::string("sudo date -s ") + root["result"].asString()).c_str());
-    spdlog::info("update datetime successfully!");
-#else
-    spdlog::warn("your operator system is not linux,ony linux the datetime update is needed.");
-#endif
+/// 将前端类似于2023-06-21T23:59:59.000Z 转化为2023-06-21 23:59:59.000
+/// \param js_date
+/// \return
+void Custom::JsDateToDrogonDate(std::string &js_date) {
+    replace_str(js_date, "T", " ");
+    replace_str(js_date, "Z", "");
+}
+
+bool Custom::json_array_2_vector(const Json::Value &array, std::vector<std::string> &vec) {
+    if (!array.isArray()) { return false; }
+    for (auto &value: array) {
+        std::string val = value.asString();
+        vec.emplace_back(val);
+    }
     return true;
 }
 
+///
+/// \param data_time 20220615071032977
+/// \return
+trantor::Date Custom::format_date_time(const string &data_time) {
+    std::string year = data_time.substr(0, 4);
+    std::string month = data_time.substr(4, 2);
+    std::string day = data_time.substr(6, 2);
+    std::string hour = data_time.substr(8, 2);
+    std::string minute = data_time.substr(10, 2);
+    std::string second = data_time.substr(12, 2);
+    std::string msecond = data_time.substr(14, 3);
 
-// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
-std::string Custom::currentDateTime() {
-    time_t now = time(nullptr);
-    struct tm t_struct{};
-    char buf[80];
-    t_struct = *localtime(&now);
-    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
-    // for more information about date/time format
-    strftime(buf, sizeof(buf), "%Y-%m-%d %X", &t_struct);
-    return buf;
+    std::string date_time_str =
+            year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second + "." + msecond;
+    return trantor::Date::fromDbStringLocal(date_time_str);
 }
 
-// time calculate
-std::string Custom::time_delta(int d, int h, int m, int s) {
-    time_t now = time(nullptr);
-    now += d * 24 * 60 * 60 + h * 60 * 60 + m * 60 + s;
-    struct tm t_struct{};
-    char buf[80];
-    t_struct = *localtime(&now);
-    strftime(buf, sizeof(buf), "%Y-%m-%d %X", &t_struct);
-    return buf;
+void Custom::tolower_string(std::string &str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+}
+
+void Custom::toupper_string(string &str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
+        return std::toupper(c);
+    });
+}
+
+cv::Mat Custom::concat_mat_horizontal(const cv::Mat &m1, const cv::Mat &m2) {
+    if (m1.empty() || m2.empty()) {
+        LOG_ERROR << "mat is empty please check the image is correct";
+    }
+    int w1 = m1.cols;
+    int h1 = m1.rows;
+    int w2 = m2.cols;
+    int h2 = m2.rows;
+    if (!(w1 == w2 && h1 == h2)) {
+        LOG_ERROR << "two images' shape must be equal current is : h1 = " << h1 << "h2=" << h2 << "w1=" << w1 << "w2="
+                  << w2;
+    }
+    int width = w1 + w2;
+    int height = max(h1, h2);
+    cv::Mat resultImg = cv::Mat(height, width, CV_8UC3, cv::Scalar::all(5));
+
+    cv::Mat ROI_1 = resultImg(cv::Rect(0, 0, w1, h1));
+    cv::Mat ROI_2 = resultImg(cv::Rect(w1, 0, w2, h2));
+    m1.copyTo(ROI_1);
+    m2.copyTo(ROI_2);
+    return resultImg;
+}
 
 
+cv::Mat Custom::concat_mat_vertical(const cv::Mat &m1, const cv::Mat &m2) {
+    if (m1.empty() || m2.empty()) {
+        LOG_ERROR << "mat is empty please check the image is correct";
+    }
+    int w1 = m1.cols;
+    int h1 = m1.rows;
+    int w2 = m2.cols;
+    int h2 = m2.rows;
+    if (!(w1 == w2 && h1 == h2)) {
+        LOG_ERROR << "two images' shape must be equal current is : h1 = " << h1 << "h2=" << h2 << "w1=" << w1 << "w2="
+                  << w2;
+    }
+    int width = max(w1, w2);
+    int height = h1 + h2;
+    cv::Mat resultImg = cv::Mat(height, width, CV_8UC3, cv::Scalar::all(5));
+
+    cv::Mat ROI_1 = resultImg(cv::Rect(0, 0, w1, h1));
+    cv::Mat ROI_2 = resultImg(cv::Rect(0, h1, w2, h2));
+    m1.copyTo(ROI_1);
+    m2.copyTo(ROI_2);
+    return resultImg;
+}
+
+std::string Custom::front_time_to_backend(const string &fronted_time) {
+    //2023-07-31T15:59:59.000Z
+    auto parts = drogon::utils::splitString(fronted_time, "T");
+    if (parts.size() != 2) {
+        LOG_ERROR << "time format error";
+        return "";
+    }
+    std::string time = parts[1];
+    replace_str(time, "Z", "");
+    return parts[0] + "" + time;
 }

@@ -43,10 +43,12 @@ class Staff
     struct Cols
     {
         static const std::string _id;
-        static const std::string _staff_id;
+        static const std::string _index_id;
+        static const std::string _uid;
         static const std::string _name;
-        static const std::string _file_path;
-        static const std::string _update_time;
+        static const std::string _pic_url;
+        static const std::string _feature;
+        static const std::string _register_time;
     };
 
     const static int primaryKeyNumber;
@@ -106,14 +108,24 @@ class Staff
     ///Set the value of the column id
     void setId(const uint64_t &pId) noexcept;
 
-    /**  For column staff_id  */
-    ///Get the value of the column staff_id, returns the default value if the column is null
-    const std::string &getValueOfStaffId() const noexcept;
+    /**  For column index_id  */
+    ///Get the value of the column index_id, returns the default value if the column is null
+    const uint64_t &getValueOfIndexId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getStaffId() const noexcept;
-    ///Set the value of the column staff_id
-    void setStaffId(const std::string &pStaffId) noexcept;
-    void setStaffId(std::string &&pStaffId) noexcept;
+    const std::shared_ptr<uint64_t> &getIndexId() const noexcept;
+    ///Set the value of the column index_id
+    void setIndexId(const uint64_t &pIndexId) noexcept;
+    void setIndexIdToNull() noexcept;
+
+    /**  For column uid  */
+    ///Get the value of the column uid, returns the default value if the column is null
+    const std::string &getValueOfUid() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getUid() const noexcept;
+    ///Set the value of the column uid
+    void setUid(const std::string &pUid) noexcept;
+    void setUid(std::string &&pUid) noexcept;
+    void setUidToNull() noexcept;
 
     /**  For column name  */
     ///Get the value of the column name, returns the default value if the column is null
@@ -123,28 +135,42 @@ class Staff
     ///Set the value of the column name
     void setName(const std::string &pName) noexcept;
     void setName(std::string &&pName) noexcept;
+    void setNameToNull() noexcept;
 
-    /**  For column file_path  */
-    ///Get the value of the column file_path, returns the default value if the column is null
-    const std::string &getValueOfFilePath() const noexcept;
+    /**  For column pic_url  */
+    ///Get the value of the column pic_url, returns the default value if the column is null
+    const std::string &getValueOfPicUrl() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getFilePath() const noexcept;
-    ///Set the value of the column file_path
-    void setFilePath(const std::string &pFilePath) noexcept;
-    void setFilePath(std::string &&pFilePath) noexcept;
+    const std::shared_ptr<std::string> &getPicUrl() const noexcept;
+    ///Set the value of the column pic_url
+    void setPicUrl(const std::string &pPicUrl) noexcept;
+    void setPicUrl(std::string &&pPicUrl) noexcept;
+    void setPicUrlToNull() noexcept;
 
-    /**  For column update_time  */
-    ///Get the value of the column update_time, returns the default value if the column is null
-    const std::string &getValueOfUpdateTime() const noexcept;
+    /**  For column feature  */
+    ///Get the value of the column feature, returns the default value if the column is null
+    const std::vector<char> &getValueOfFeature() const noexcept;
+    ///Return the column value by std::string with binary data
+    std::string getValueOfFeatureAsString() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getUpdateTime() const noexcept;
-    ///Set the value of the column update_time
-    void setUpdateTime(const std::string &pUpdateTime) noexcept;
-    void setUpdateTime(std::string &&pUpdateTime) noexcept;
-    void setUpdateTimeToNull() noexcept;
+    const std::shared_ptr<std::vector<char>> &getFeature() const noexcept;
+    ///Set the value of the column feature
+    void setFeature(const std::vector<char> &pFeature) noexcept;
+    void setFeature(const std::string &pFeature) noexcept;
+    void setFeatureToNull() noexcept;
+
+    /**  For column register_time  */
+    ///Get the value of the column register_time, returns the default value if the column is null
+    const std::string &getValueOfRegisterTime() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getRegisterTime() const noexcept;
+    ///Set the value of the column register_time
+    void setRegisterTime(const std::string &pRegisterTime) noexcept;
+    void setRegisterTime(std::string &&pRegisterTime) noexcept;
+    void setRegisterTimeToNull() noexcept;
 
 
-    static size_t getColumnNumber() noexcept {  return 5;  }
+    static size_t getColumnNumber() noexcept {  return 7;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -162,10 +188,12 @@ class Staff
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<uint64_t> id_;
-    std::shared_ptr<std::string> staffId_;
+    std::shared_ptr<uint64_t> indexId_;
+    std::shared_ptr<std::string> uid_;
     std::shared_ptr<std::string> name_;
-    std::shared_ptr<std::string> filePath_;
-    std::shared_ptr<std::string> updateTime_;
+    std::shared_ptr<std::string> picUrl_;
+    std::shared_ptr<std::vector<char>> feature_;
+    std::shared_ptr<std::string> registerTime_;
     struct MetaData
     {
         const std::string colName_;
@@ -177,7 +205,7 @@ class Staff
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[5]={ false };
+    bool dirtyFlag_[7]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -197,22 +225,32 @@ class Staff
         needSelection = false;
         if(dirtyFlag_[1])
         {
-            sql += "staff_id,";
+            sql += "index_id,";
             ++parametersCount;
         }
         if(dirtyFlag_[2])
         {
-            sql += "name,";
+            sql += "uid,";
             ++parametersCount;
         }
         if(dirtyFlag_[3])
         {
-            sql += "file_path,";
+            sql += "name,";
             ++parametersCount;
         }
         if(dirtyFlag_[4])
         {
-            sql += "update_time,";
+            sql += "pic_url,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[5])
+        {
+            sql += "feature,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[6])
+        {
+            sql += "register_time,";
             ++parametersCount;
         }
         if(parametersCount > 0)
@@ -239,6 +277,16 @@ class Staff
 
         }
         if(dirtyFlag_[4])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[5])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[6])
         {
             sql.append("?,");
 

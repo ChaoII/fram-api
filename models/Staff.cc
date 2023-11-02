@@ -14,20 +14,24 @@ using namespace drogon::orm;
 using namespace drogon_model::sqlite3;
 
 const std::string Staff::Cols::_id = "id";
-const std::string Staff::Cols::_staff_id = "staff_id";
+const std::string Staff::Cols::_index_id = "index_id";
+const std::string Staff::Cols::_uid = "uid";
 const std::string Staff::Cols::_name = "name";
-const std::string Staff::Cols::_file_path = "file_path";
-const std::string Staff::Cols::_update_time = "update_time";
+const std::string Staff::Cols::_pic_url = "pic_url";
+const std::string Staff::Cols::_feature = "feature";
+const std::string Staff::Cols::_register_time = "register_time";
 const std::string Staff::primaryKeyName = "id";
 const bool Staff::hasPrimaryKey = true;
 const std::string Staff::tableName = "staff";
 
 const std::vector<typename Staff::MetaData> Staff::metaData_={
 {"id","uint64_t","integer",8,1,1,1},
-{"staff_id","std::string","text",0,0,0,1},
-{"name","std::string","text",0,0,0,1},
-{"file_path","std::string","text",0,0,0,1},
-{"update_time","std::string","text",0,0,0,0}
+{"index_id","uint64_t","integer",8,0,0,0},
+{"uid","std::string","text",0,0,0,0},
+{"name","std::string","text",0,0,0,0},
+{"pic_url","std::string","text",0,0,0,0},
+{"feature","std::vector<char>","blob",0,0,0,0},
+{"register_time","std::string","text",0,0,0,0}
 };
 const std::string &Staff::getColumnName(size_t index) noexcept(false)
 {
@@ -42,27 +46,35 @@ Staff::Staff(const Row &r, const ssize_t indexOffset) noexcept
         {
             id_=std::make_shared<uint64_t>(r["id"].as<uint64_t>());
         }
-        if(!r["staff_id"].isNull())
+        if(!r["index_id"].isNull())
         {
-            staffId_=std::make_shared<std::string>(r["staff_id"].as<std::string>());
+            indexId_=std::make_shared<uint64_t>(r["index_id"].as<uint64_t>());
+        }
+        if(!r["uid"].isNull())
+        {
+            uid_=std::make_shared<std::string>(r["uid"].as<std::string>());
         }
         if(!r["name"].isNull())
         {
             name_=std::make_shared<std::string>(r["name"].as<std::string>());
         }
-        if(!r["file_path"].isNull())
+        if(!r["pic_url"].isNull())
         {
-            filePath_=std::make_shared<std::string>(r["file_path"].as<std::string>());
+            picUrl_=std::make_shared<std::string>(r["pic_url"].as<std::string>());
         }
-        if(!r["update_time"].isNull())
+        if(!r["feature"].isNull())
         {
-            updateTime_=std::make_shared<std::string>(r["update_time"].as<std::string>());
+            feature_=std::make_shared<std::vector<char>>(r["feature"].as<std::vector<char>>());
+        }
+        if(!r["register_time"].isNull())
+        {
+            registerTime_=std::make_shared<std::string>(r["register_time"].as<std::string>());
         }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 5 > r.size())
+        if(offset + 7 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -76,22 +88,32 @@ Staff::Staff(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 1;
         if(!r[index].isNull())
         {
-            staffId_=std::make_shared<std::string>(r[index].as<std::string>());
+            indexId_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
         }
         index = offset + 2;
         if(!r[index].isNull())
         {
-            name_=std::make_shared<std::string>(r[index].as<std::string>());
+            uid_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 3;
         if(!r[index].isNull())
         {
-            filePath_=std::make_shared<std::string>(r[index].as<std::string>());
+            name_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 4;
         if(!r[index].isNull())
         {
-            updateTime_=std::make_shared<std::string>(r[index].as<std::string>());
+            picUrl_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 5;
+        if(!r[index].isNull())
+        {
+            feature_=std::make_shared<std::vector<char>>(r[index].as<std::vector<char>>());
+        }
+        index = offset + 6;
+        if(!r[index].isNull())
+        {
+            registerTime_=std::make_shared<std::string>(r[index].as<std::string>());
         }
     }
 
@@ -99,7 +121,7 @@ Staff::Staff(const Row &r, const ssize_t indexOffset) noexcept
 
 Staff::Staff(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 5)
+    if(pMasqueradingVector.size() != 7)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -117,7 +139,7 @@ Staff::Staff(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            staffId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            indexId_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[1]].asUInt64());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -125,7 +147,7 @@ Staff::Staff(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            name_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            uid_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -133,7 +155,7 @@ Staff::Staff(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            filePath_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            name_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -141,7 +163,24 @@ Staff::Staff(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            updateTime_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
+            picUrl_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
+        }
+    }
+    if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
+    {
+        dirtyFlag_[5] = true;
+        if(!pJson[pMasqueradingVector[5]].isNull())
+        {
+            auto str = pJson[pMasqueradingVector[5]].asString();
+            feature_=std::make_shared<std::vector<char>>(drogon::utils::base64DecodeToVector(str));
+        }
+    }
+    if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson[pMasqueradingVector[6]].isNull())
+        {
+            registerTime_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
         }
     }
 }
@@ -156,36 +195,53 @@ Staff::Staff(const Json::Value &pJson) noexcept(false)
             id_=std::make_shared<uint64_t>((uint64_t)pJson["id"].asUInt64());
         }
     }
-    if(pJson.isMember("staff_id"))
+    if(pJson.isMember("index_id"))
     {
         dirtyFlag_[1]=true;
-        if(!pJson["staff_id"].isNull())
+        if(!pJson["index_id"].isNull())
         {
-            staffId_=std::make_shared<std::string>(pJson["staff_id"].asString());
+            indexId_=std::make_shared<uint64_t>((uint64_t)pJson["index_id"].asUInt64());
+        }
+    }
+    if(pJson.isMember("uid"))
+    {
+        dirtyFlag_[2]=true;
+        if(!pJson["uid"].isNull())
+        {
+            uid_=std::make_shared<std::string>(pJson["uid"].asString());
         }
     }
     if(pJson.isMember("name"))
     {
-        dirtyFlag_[2]=true;
+        dirtyFlag_[3]=true;
         if(!pJson["name"].isNull())
         {
             name_=std::make_shared<std::string>(pJson["name"].asString());
         }
     }
-    if(pJson.isMember("file_path"))
-    {
-        dirtyFlag_[3]=true;
-        if(!pJson["file_path"].isNull())
-        {
-            filePath_=std::make_shared<std::string>(pJson["file_path"].asString());
-        }
-    }
-    if(pJson.isMember("update_time"))
+    if(pJson.isMember("pic_url"))
     {
         dirtyFlag_[4]=true;
-        if(!pJson["update_time"].isNull())
+        if(!pJson["pic_url"].isNull())
         {
-            updateTime_=std::make_shared<std::string>(pJson["update_time"].asString());
+            picUrl_=std::make_shared<std::string>(pJson["pic_url"].asString());
+        }
+    }
+    if(pJson.isMember("feature"))
+    {
+        dirtyFlag_[5]=true;
+        if(!pJson["feature"].isNull())
+        {
+            auto str = pJson["feature"].asString();
+            feature_=std::make_shared<std::vector<char>>(drogon::utils::base64DecodeToVector(str));
+        }
+    }
+    if(pJson.isMember("register_time"))
+    {
+        dirtyFlag_[6]=true;
+        if(!pJson["register_time"].isNull())
+        {
+            registerTime_=std::make_shared<std::string>(pJson["register_time"].asString());
         }
     }
 }
@@ -193,7 +249,7 @@ Staff::Staff(const Json::Value &pJson) noexcept(false)
 void Staff::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 5)
+    if(pMasqueradingVector.size() != 7)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -210,7 +266,7 @@ void Staff::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            staffId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            indexId_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[1]].asUInt64());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -218,7 +274,7 @@ void Staff::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            name_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            uid_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -226,7 +282,7 @@ void Staff::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            filePath_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            name_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -234,7 +290,24 @@ void Staff::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            updateTime_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
+            picUrl_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
+        }
+    }
+    if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
+    {
+        dirtyFlag_[5] = true;
+        if(!pJson[pMasqueradingVector[5]].isNull())
+        {
+            auto str = pJson[pMasqueradingVector[5]].asString();
+            feature_=std::make_shared<std::vector<char>>(drogon::utils::base64DecodeToVector(str));
+        }
+    }
+    if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson[pMasqueradingVector[6]].isNull())
+        {
+            registerTime_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
         }
     }
 }
@@ -248,36 +321,53 @@ void Staff::updateByJson(const Json::Value &pJson) noexcept(false)
             id_=std::make_shared<uint64_t>((uint64_t)pJson["id"].asUInt64());
         }
     }
-    if(pJson.isMember("staff_id"))
+    if(pJson.isMember("index_id"))
     {
         dirtyFlag_[1] = true;
-        if(!pJson["staff_id"].isNull())
+        if(!pJson["index_id"].isNull())
         {
-            staffId_=std::make_shared<std::string>(pJson["staff_id"].asString());
+            indexId_=std::make_shared<uint64_t>((uint64_t)pJson["index_id"].asUInt64());
+        }
+    }
+    if(pJson.isMember("uid"))
+    {
+        dirtyFlag_[2] = true;
+        if(!pJson["uid"].isNull())
+        {
+            uid_=std::make_shared<std::string>(pJson["uid"].asString());
         }
     }
     if(pJson.isMember("name"))
     {
-        dirtyFlag_[2] = true;
+        dirtyFlag_[3] = true;
         if(!pJson["name"].isNull())
         {
             name_=std::make_shared<std::string>(pJson["name"].asString());
         }
     }
-    if(pJson.isMember("file_path"))
-    {
-        dirtyFlag_[3] = true;
-        if(!pJson["file_path"].isNull())
-        {
-            filePath_=std::make_shared<std::string>(pJson["file_path"].asString());
-        }
-    }
-    if(pJson.isMember("update_time"))
+    if(pJson.isMember("pic_url"))
     {
         dirtyFlag_[4] = true;
-        if(!pJson["update_time"].isNull())
+        if(!pJson["pic_url"].isNull())
         {
-            updateTime_=std::make_shared<std::string>(pJson["update_time"].asString());
+            picUrl_=std::make_shared<std::string>(pJson["pic_url"].asString());
+        }
+    }
+    if(pJson.isMember("feature"))
+    {
+        dirtyFlag_[5] = true;
+        if(!pJson["feature"].isNull())
+        {
+            auto str = pJson["feature"].asString();
+            feature_=std::make_shared<std::vector<char>>(drogon::utils::base64DecodeToVector(str));
+        }
+    }
+    if(pJson.isMember("register_time"))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson["register_time"].isNull())
+        {
+            registerTime_=std::make_shared<std::string>(pJson["register_time"].asString());
         }
     }
 }
@@ -304,26 +394,53 @@ const typename Staff::PrimaryKeyType & Staff::getPrimaryKey() const
     return *id_;
 }
 
-const std::string &Staff::getValueOfStaffId() const noexcept
+const uint64_t &Staff::getValueOfIndexId() const noexcept
 {
-    const static std::string defaultValue = std::string();
-    if(staffId_)
-        return *staffId_;
+    const static uint64_t defaultValue = uint64_t();
+    if(indexId_)
+        return *indexId_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Staff::getStaffId() const noexcept
+const std::shared_ptr<uint64_t> &Staff::getIndexId() const noexcept
 {
-    return staffId_;
+    return indexId_;
 }
-void Staff::setStaffId(const std::string &pStaffId) noexcept
+void Staff::setIndexId(const uint64_t &pIndexId) noexcept
 {
-    staffId_ = std::make_shared<std::string>(pStaffId);
+    indexId_ = std::make_shared<uint64_t>(pIndexId);
     dirtyFlag_[1] = true;
 }
-void Staff::setStaffId(std::string &&pStaffId) noexcept
+void Staff::setIndexIdToNull() noexcept
 {
-    staffId_ = std::make_shared<std::string>(std::move(pStaffId));
+    indexId_.reset();
     dirtyFlag_[1] = true;
+}
+
+const std::string &Staff::getValueOfUid() const noexcept
+{
+    const static std::string defaultValue = std::string();
+    if(uid_)
+        return *uid_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Staff::getUid() const noexcept
+{
+    return uid_;
+}
+void Staff::setUid(const std::string &pUid) noexcept
+{
+    uid_ = std::make_shared<std::string>(pUid);
+    dirtyFlag_[2] = true;
+}
+void Staff::setUid(std::string &&pUid) noexcept
+{
+    uid_ = std::make_shared<std::string>(std::move(pUid));
+    dirtyFlag_[2] = true;
+}
+void Staff::setUidToNull() noexcept
+{
+    uid_.reset();
+    dirtyFlag_[2] = true;
 }
 
 const std::string &Staff::getValueOfName() const noexcept
@@ -340,61 +457,105 @@ const std::shared_ptr<std::string> &Staff::getName() const noexcept
 void Staff::setName(const std::string &pName) noexcept
 {
     name_ = std::make_shared<std::string>(pName);
-    dirtyFlag_[2] = true;
+    dirtyFlag_[3] = true;
 }
 void Staff::setName(std::string &&pName) noexcept
 {
     name_ = std::make_shared<std::string>(std::move(pName));
-    dirtyFlag_[2] = true;
-}
-
-const std::string &Staff::getValueOfFilePath() const noexcept
-{
-    const static std::string defaultValue = std::string();
-    if(filePath_)
-        return *filePath_;
-    return defaultValue;
-}
-const std::shared_ptr<std::string> &Staff::getFilePath() const noexcept
-{
-    return filePath_;
-}
-void Staff::setFilePath(const std::string &pFilePath) noexcept
-{
-    filePath_ = std::make_shared<std::string>(pFilePath);
     dirtyFlag_[3] = true;
 }
-void Staff::setFilePath(std::string &&pFilePath) noexcept
+void Staff::setNameToNull() noexcept
 {
-    filePath_ = std::make_shared<std::string>(std::move(pFilePath));
+    name_.reset();
     dirtyFlag_[3] = true;
 }
 
-const std::string &Staff::getValueOfUpdateTime() const noexcept
+const std::string &Staff::getValueOfPicUrl() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if(updateTime_)
-        return *updateTime_;
+    if(picUrl_)
+        return *picUrl_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Staff::getUpdateTime() const noexcept
+const std::shared_ptr<std::string> &Staff::getPicUrl() const noexcept
 {
-    return updateTime_;
+    return picUrl_;
 }
-void Staff::setUpdateTime(const std::string &pUpdateTime) noexcept
+void Staff::setPicUrl(const std::string &pPicUrl) noexcept
 {
-    updateTime_ = std::make_shared<std::string>(pUpdateTime);
+    picUrl_ = std::make_shared<std::string>(pPicUrl);
     dirtyFlag_[4] = true;
 }
-void Staff::setUpdateTime(std::string &&pUpdateTime) noexcept
+void Staff::setPicUrl(std::string &&pPicUrl) noexcept
 {
-    updateTime_ = std::make_shared<std::string>(std::move(pUpdateTime));
+    picUrl_ = std::make_shared<std::string>(std::move(pPicUrl));
     dirtyFlag_[4] = true;
 }
-void Staff::setUpdateTimeToNull() noexcept
+void Staff::setPicUrlToNull() noexcept
 {
-    updateTime_.reset();
+    picUrl_.reset();
     dirtyFlag_[4] = true;
+}
+
+const std::vector<char> &Staff::getValueOfFeature() const noexcept
+{
+    const static std::vector<char> defaultValue = std::vector<char>();
+    if(feature_)
+        return *feature_;
+    return defaultValue;
+}
+std::string Staff::getValueOfFeatureAsString() const noexcept
+{
+    const static std::string defaultValue = std::string();
+    if(feature_)
+        return std::string(feature_->data(),feature_->size());
+    return defaultValue;
+}
+const std::shared_ptr<std::vector<char>> &Staff::getFeature() const noexcept
+{
+    return feature_;
+}
+void Staff::setFeature(const std::vector<char> &pFeature) noexcept
+{
+    feature_ = std::make_shared<std::vector<char>>(pFeature);
+    dirtyFlag_[5] = true;
+}
+void Staff::setFeature(const std::string &pFeature) noexcept
+{
+    feature_ = std::make_shared<std::vector<char>>(pFeature.c_str(),pFeature.c_str()+pFeature.length());
+    dirtyFlag_[5] = true;
+}
+void Staff::setFeatureToNull() noexcept
+{
+    feature_.reset();
+    dirtyFlag_[5] = true;
+}
+
+const std::string &Staff::getValueOfRegisterTime() const noexcept
+{
+    const static std::string defaultValue = std::string();
+    if(registerTime_)
+        return *registerTime_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Staff::getRegisterTime() const noexcept
+{
+    return registerTime_;
+}
+void Staff::setRegisterTime(const std::string &pRegisterTime) noexcept
+{
+    registerTime_ = std::make_shared<std::string>(pRegisterTime);
+    dirtyFlag_[6] = true;
+}
+void Staff::setRegisterTime(std::string &&pRegisterTime) noexcept
+{
+    registerTime_ = std::make_shared<std::string>(std::move(pRegisterTime));
+    dirtyFlag_[6] = true;
+}
+void Staff::setRegisterTimeToNull() noexcept
+{
+    registerTime_.reset();
+    dirtyFlag_[6] = true;
 }
 
 void Staff::updateId(const uint64_t id)
@@ -405,10 +566,12 @@ void Staff::updateId(const uint64_t id)
 const std::vector<std::string> &Staff::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
-        "staff_id",
+        "index_id",
+        "uid",
         "name",
-        "file_path",
-        "update_time"
+        "pic_url",
+        "feature",
+        "register_time"
     };
     return inCols;
 }
@@ -417,9 +580,9 @@ void Staff::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[1])
     {
-        if(getStaffId())
+        if(getIndexId())
         {
-            binder << getValueOfStaffId();
+            binder << getValueOfIndexId();
         }
         else
         {
@@ -427,6 +590,17 @@ void Staff::outputArgs(drogon::orm::internal::SqlBinder &binder) const
         }
     }
     if(dirtyFlag_[2])
+    {
+        if(getUid())
+        {
+            binder << getValueOfUid();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[3])
     {
         if(getName())
         {
@@ -437,22 +611,33 @@ void Staff::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[3])
+    if(dirtyFlag_[4])
     {
-        if(getFilePath())
+        if(getPicUrl())
         {
-            binder << getValueOfFilePath();
+            binder << getValueOfPicUrl();
         }
         else
         {
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[4])
+    if(dirtyFlag_[5])
     {
-        if(getUpdateTime())
+        if(getFeature())
         {
-            binder << getValueOfUpdateTime();
+            binder << getValueOfFeature();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[6])
+    {
+        if(getRegisterTime())
+        {
+            binder << getValueOfRegisterTime();
         }
         else
         {
@@ -480,6 +665,14 @@ const std::vector<std::string> Staff::updateColumns() const
     {
         ret.push_back(getColumnName(4));
     }
+    if(dirtyFlag_[5])
+    {
+        ret.push_back(getColumnName(5));
+    }
+    if(dirtyFlag_[6])
+    {
+        ret.push_back(getColumnName(6));
+    }
     return ret;
 }
 
@@ -487,9 +680,9 @@ void Staff::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[1])
     {
-        if(getStaffId())
+        if(getIndexId())
         {
-            binder << getValueOfStaffId();
+            binder << getValueOfIndexId();
         }
         else
         {
@@ -497,6 +690,17 @@ void Staff::updateArgs(drogon::orm::internal::SqlBinder &binder) const
         }
     }
     if(dirtyFlag_[2])
+    {
+        if(getUid())
+        {
+            binder << getValueOfUid();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[3])
     {
         if(getName())
         {
@@ -507,22 +711,33 @@ void Staff::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[3])
+    if(dirtyFlag_[4])
     {
-        if(getFilePath())
+        if(getPicUrl())
         {
-            binder << getValueOfFilePath();
+            binder << getValueOfPicUrl();
         }
         else
         {
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[4])
+    if(dirtyFlag_[5])
     {
-        if(getUpdateTime())
+        if(getFeature())
         {
-            binder << getValueOfUpdateTime();
+            binder << getValueOfFeature();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[6])
+    {
+        if(getRegisterTime())
+        {
+            binder << getValueOfRegisterTime();
         }
         else
         {
@@ -541,13 +756,21 @@ Json::Value Staff::toJson() const
     {
         ret["id"]=Json::Value();
     }
-    if(getStaffId())
+    if(getIndexId())
     {
-        ret["staff_id"]=getValueOfStaffId();
+        ret["index_id"]=(Json::UInt64)getValueOfIndexId();
     }
     else
     {
-        ret["staff_id"]=Json::Value();
+        ret["index_id"]=Json::Value();
+    }
+    if(getUid())
+    {
+        ret["uid"]=getValueOfUid();
+    }
+    else
+    {
+        ret["uid"]=Json::Value();
     }
     if(getName())
     {
@@ -557,21 +780,29 @@ Json::Value Staff::toJson() const
     {
         ret["name"]=Json::Value();
     }
-    if(getFilePath())
+    if(getPicUrl())
     {
-        ret["file_path"]=getValueOfFilePath();
+        ret["pic_url"]=getValueOfPicUrl();
     }
     else
     {
-        ret["file_path"]=Json::Value();
+        ret["pic_url"]=Json::Value();
     }
-    if(getUpdateTime())
+    if(getFeature())
     {
-        ret["update_time"]=getValueOfUpdateTime();
+        ret["feature"]=drogon::utils::base64Encode((const unsigned char *)getFeature()->data(),getFeature()->size());
     }
     else
     {
-        ret["update_time"]=Json::Value();
+        ret["feature"]=Json::Value();
+    }
+    if(getRegisterTime())
+    {
+        ret["register_time"]=getValueOfRegisterTime();
+    }
+    else
+    {
+        ret["register_time"]=Json::Value();
     }
     return ret;
 }
@@ -580,7 +811,7 @@ Json::Value Staff::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 5)
+    if(pMasqueradingVector.size() == 7)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -595,9 +826,9 @@ Json::Value Staff::toMasqueradedJson(
         }
         if(!pMasqueradingVector[1].empty())
         {
-            if(getStaffId())
+            if(getIndexId())
             {
-                ret[pMasqueradingVector[1]]=getValueOfStaffId();
+                ret[pMasqueradingVector[1]]=(Json::UInt64)getValueOfIndexId();
             }
             else
             {
@@ -606,9 +837,9 @@ Json::Value Staff::toMasqueradedJson(
         }
         if(!pMasqueradingVector[2].empty())
         {
-            if(getName())
+            if(getUid())
             {
-                ret[pMasqueradingVector[2]]=getValueOfName();
+                ret[pMasqueradingVector[2]]=getValueOfUid();
             }
             else
             {
@@ -617,9 +848,9 @@ Json::Value Staff::toMasqueradedJson(
         }
         if(!pMasqueradingVector[3].empty())
         {
-            if(getFilePath())
+            if(getName())
             {
-                ret[pMasqueradingVector[3]]=getValueOfFilePath();
+                ret[pMasqueradingVector[3]]=getValueOfName();
             }
             else
             {
@@ -628,13 +859,35 @@ Json::Value Staff::toMasqueradedJson(
         }
         if(!pMasqueradingVector[4].empty())
         {
-            if(getUpdateTime())
+            if(getPicUrl())
             {
-                ret[pMasqueradingVector[4]]=getValueOfUpdateTime();
+                ret[pMasqueradingVector[4]]=getValueOfPicUrl();
             }
             else
             {
                 ret[pMasqueradingVector[4]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[5].empty())
+        {
+            if(getFeature())
+            {
+                ret[pMasqueradingVector[5]]=drogon::utils::base64Encode((const unsigned char *)getFeature()->data(),getFeature()->size());
+            }
+            else
+            {
+                ret[pMasqueradingVector[5]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[6].empty())
+        {
+            if(getRegisterTime())
+            {
+                ret[pMasqueradingVector[6]]=getValueOfRegisterTime();
+            }
+            else
+            {
+                ret[pMasqueradingVector[6]]=Json::Value();
             }
         }
         return ret;
@@ -648,13 +901,21 @@ Json::Value Staff::toMasqueradedJson(
     {
         ret["id"]=Json::Value();
     }
-    if(getStaffId())
+    if(getIndexId())
     {
-        ret["staff_id"]=getValueOfStaffId();
+        ret["index_id"]=(Json::UInt64)getValueOfIndexId();
     }
     else
     {
-        ret["staff_id"]=Json::Value();
+        ret["index_id"]=Json::Value();
+    }
+    if(getUid())
+    {
+        ret["uid"]=getValueOfUid();
+    }
+    else
+    {
+        ret["uid"]=Json::Value();
     }
     if(getName())
     {
@@ -664,21 +925,29 @@ Json::Value Staff::toMasqueradedJson(
     {
         ret["name"]=Json::Value();
     }
-    if(getFilePath())
+    if(getPicUrl())
     {
-        ret["file_path"]=getValueOfFilePath();
+        ret["pic_url"]=getValueOfPicUrl();
     }
     else
     {
-        ret["file_path"]=Json::Value();
+        ret["pic_url"]=Json::Value();
     }
-    if(getUpdateTime())
+    if(getFeature())
     {
-        ret["update_time"]=getValueOfUpdateTime();
+        ret["feature"]=drogon::utils::base64Encode((const unsigned char *)getFeature()->data(),getFeature()->size());
     }
     else
     {
-        ret["update_time"]=Json::Value();
+        ret["feature"]=Json::Value();
+    }
+    if(getRegisterTime())
+    {
+        ret["register_time"]=getValueOfRegisterTime();
+    }
+    else
+    {
+        ret["register_time"]=Json::Value();
     }
     return ret;
 }
@@ -690,39 +959,34 @@ bool Staff::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
-    if(pJson.isMember("staff_id"))
+    if(pJson.isMember("index_id"))
     {
-        if(!validJsonOfField(1, "staff_id", pJson["staff_id"], err, true))
+        if(!validJsonOfField(1, "index_id", pJson["index_id"], err, true))
             return false;
     }
-    else
+    if(pJson.isMember("uid"))
     {
-        err="The staff_id column cannot be null";
-        return false;
+        if(!validJsonOfField(2, "uid", pJson["uid"], err, true))
+            return false;
     }
     if(pJson.isMember("name"))
     {
-        if(!validJsonOfField(2, "name", pJson["name"], err, true))
+        if(!validJsonOfField(3, "name", pJson["name"], err, true))
             return false;
     }
-    else
+    if(pJson.isMember("pic_url"))
     {
-        err="The name column cannot be null";
-        return false;
-    }
-    if(pJson.isMember("file_path"))
-    {
-        if(!validJsonOfField(3, "file_path", pJson["file_path"], err, true))
+        if(!validJsonOfField(4, "pic_url", pJson["pic_url"], err, true))
             return false;
     }
-    else
+    if(pJson.isMember("feature"))
     {
-        err="The file_path column cannot be null";
-        return false;
+        if(!validJsonOfField(5, "feature", pJson["feature"], err, true))
+            return false;
     }
-    if(pJson.isMember("update_time"))
+    if(pJson.isMember("register_time"))
     {
-        if(!validJsonOfField(4, "update_time", pJson["update_time"], err, true))
+        if(!validJsonOfField(6, "register_time", pJson["register_time"], err, true))
             return false;
     }
     return true;
@@ -731,7 +995,7 @@ bool Staff::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                const std::vector<std::string> &pMasqueradingVector,
                                                std::string &err)
 {
-    if(pMasqueradingVector.size() != 5)
+    if(pMasqueradingVector.size() != 7)
     {
         err = "Bad masquerading vector";
         return false;
@@ -752,11 +1016,6 @@ bool Staff::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[1] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[2].empty())
       {
@@ -765,11 +1024,6 @@ bool Staff::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[2] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[3].empty())
       {
@@ -778,17 +1032,28 @@ bool Staff::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[3] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[4].empty())
       {
           if(pJson.isMember(pMasqueradingVector[4]))
           {
               if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[5].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[5]))
+          {
+              if(!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[6].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[6]))
+          {
+              if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, true))
                   return false;
           }
       }
@@ -812,24 +1077,34 @@ bool Staff::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
-    if(pJson.isMember("staff_id"))
+    if(pJson.isMember("index_id"))
     {
-        if(!validJsonOfField(1, "staff_id", pJson["staff_id"], err, false))
+        if(!validJsonOfField(1, "index_id", pJson["index_id"], err, false))
+            return false;
+    }
+    if(pJson.isMember("uid"))
+    {
+        if(!validJsonOfField(2, "uid", pJson["uid"], err, false))
             return false;
     }
     if(pJson.isMember("name"))
     {
-        if(!validJsonOfField(2, "name", pJson["name"], err, false))
+        if(!validJsonOfField(3, "name", pJson["name"], err, false))
             return false;
     }
-    if(pJson.isMember("file_path"))
+    if(pJson.isMember("pic_url"))
     {
-        if(!validJsonOfField(3, "file_path", pJson["file_path"], err, false))
+        if(!validJsonOfField(4, "pic_url", pJson["pic_url"], err, false))
             return false;
     }
-    if(pJson.isMember("update_time"))
+    if(pJson.isMember("feature"))
     {
-        if(!validJsonOfField(4, "update_time", pJson["update_time"], err, false))
+        if(!validJsonOfField(5, "feature", pJson["feature"], err, false))
+            return false;
+    }
+    if(pJson.isMember("register_time"))
+    {
+        if(!validJsonOfField(6, "register_time", pJson["register_time"], err, false))
             return false;
     }
     return true;
@@ -838,7 +1113,7 @@ bool Staff::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                              const std::vector<std::string> &pMasqueradingVector,
                                              std::string &err)
 {
-    if(pMasqueradingVector.size() != 5)
+    if(pMasqueradingVector.size() != 7)
     {
         err = "Bad masquerading vector";
         return false;
@@ -872,6 +1147,16 @@ bool Staff::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
       if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
       {
           if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
+      {
+          if(!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
+      {
+          if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, false))
               return false;
       }
     }
@@ -910,10 +1195,9 @@ bool Staff::validJsonOfField(size_t index,
         case 1:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
-            if(!pJson.isString())
+            if(!pJson.isUInt64())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -922,8 +1206,7 @@ bool Staff::validJsonOfField(size_t index,
         case 2:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -934,8 +1217,7 @@ bool Staff::validJsonOfField(size_t index,
         case 3:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -954,10 +1236,31 @@ bool Staff::validJsonOfField(size_t index,
                 return false;
             }
             break;
+        case 5:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 6:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
         default:
             err="Internal error in the server";
             return false;
-            break;
     }
     return true;
 }

@@ -43,8 +43,9 @@ class Attend
     struct Cols
     {
         static const std::string _id;
-        static const std::string _staff_id;
+        static const std::string _uid;
         static const std::string _name;
+        static const std::string _pic_url;
         static const std::string _attend_time;
     };
 
@@ -105,14 +106,15 @@ class Attend
     ///Set the value of the column id
     void setId(const uint64_t &pId) noexcept;
 
-    /**  For column staff_id  */
-    ///Get the value of the column staff_id, returns the default value if the column is null
-    const std::string &getValueOfStaffId() const noexcept;
+    /**  For column uid  */
+    ///Get the value of the column uid, returns the default value if the column is null
+    const std::string &getValueOfUid() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getStaffId() const noexcept;
-    ///Set the value of the column staff_id
-    void setStaffId(const std::string &pStaffId) noexcept;
-    void setStaffId(std::string &&pStaffId) noexcept;
+    const std::shared_ptr<std::string> &getUid() const noexcept;
+    ///Set the value of the column uid
+    void setUid(const std::string &pUid) noexcept;
+    void setUid(std::string &&pUid) noexcept;
+    void setUidToNull() noexcept;
 
     /**  For column name  */
     ///Get the value of the column name, returns the default value if the column is null
@@ -122,6 +124,17 @@ class Attend
     ///Set the value of the column name
     void setName(const std::string &pName) noexcept;
     void setName(std::string &&pName) noexcept;
+    void setNameToNull() noexcept;
+
+    /**  For column pic_url  */
+    ///Get the value of the column pic_url, returns the default value if the column is null
+    const std::string &getValueOfPicUrl() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getPicUrl() const noexcept;
+    ///Set the value of the column pic_url
+    void setPicUrl(const std::string &pPicUrl) noexcept;
+    void setPicUrl(std::string &&pPicUrl) noexcept;
+    void setPicUrlToNull() noexcept;
 
     /**  For column attend_time  */
     ///Get the value of the column attend_time, returns the default value if the column is null
@@ -131,9 +144,10 @@ class Attend
     ///Set the value of the column attend_time
     void setAttendTime(const std::string &pAttendTime) noexcept;
     void setAttendTime(std::string &&pAttendTime) noexcept;
+    void setAttendTimeToNull() noexcept;
 
 
-    static size_t getColumnNumber() noexcept {  return 4;  }
+    static size_t getColumnNumber() noexcept {  return 5;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -151,8 +165,9 @@ class Attend
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<uint64_t> id_;
-    std::shared_ptr<std::string> staffId_;
+    std::shared_ptr<std::string> uid_;
     std::shared_ptr<std::string> name_;
+    std::shared_ptr<std::string> picUrl_;
     std::shared_ptr<std::string> attendTime_;
     struct MetaData
     {
@@ -165,7 +180,7 @@ class Attend
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[4]={ false };
+    bool dirtyFlag_[5]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -185,7 +200,7 @@ class Attend
         needSelection = false;
         if(dirtyFlag_[1])
         {
-            sql += "staff_id,";
+            sql += "uid,";
             ++parametersCount;
         }
         if(dirtyFlag_[2])
@@ -195,12 +210,13 @@ class Attend
         }
         if(dirtyFlag_[3])
         {
-            sql += "attend_time,";
+            sql += "pic_url,";
             ++parametersCount;
         }
-        if(!dirtyFlag_[3])
+        if(dirtyFlag_[4])
         {
-            needSelection=true;
+            sql += "attend_time,";
+            ++parametersCount;
         }
         if(parametersCount > 0)
         {
@@ -221,6 +237,11 @@ class Attend
 
         }
         if(dirtyFlag_[3])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[4])
         {
             sql.append("?,");
 

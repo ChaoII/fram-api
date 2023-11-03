@@ -2,11 +2,11 @@
 // Created by aichao on 2022/5/5.
 //
 
-#include "utils.h"
+#include "utils1.h"
 
 using namespace drogon;
 
-bool Custom::update_time(const std::string &host, const std::string &api_path) {
+bool Customs::update_time(const std::string &host, const std::string &api_path) {
 
     auto client = HttpClient::newHttpClient(host);
     auto req = HttpRequest::newHttpRequest();
@@ -33,7 +33,7 @@ bool Custom::update_time(const std::string &host, const std::string &api_path) {
 
 
 // Get current date/time, format is YYYY-MM-DD.HH:mm:ss
-std::string Custom::currentDateTime() {
+std::string Customs::currentDateTime() {
     time_t now = time(nullptr);
     struct tm t_struct{};
     char buf[80];
@@ -45,7 +45,7 @@ std::string Custom::currentDateTime() {
 }
 
 // time calculate
-std::string Custom::time_delta(int d, int h, int m, int s) {
+std::string Customs::time_delta(int d, int h, int m, int s) {
     time_t now = time(nullptr);
     now += d * 24 * 60 * 60 + h * 60 * 60 + m * 60 + s;
     struct tm t_struct{};

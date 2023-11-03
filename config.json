@@ -48,7 +48,7 @@
       //rdbms: Server type, postgresql,mysql or sqlite3, "postgresql" by default
       "rdbms": "sqlite3",
       //filename: Sqlite3 db file name
-      "filename": "attend.db",
+      "filename": "data.db",
       //host: Server address,localhost by default
       //"host": "127.0.0.1",
       //port: Server port, 5432 by default
@@ -230,20 +230,7 @@
     //static_files_cache_time: 5 (seconds) by default, the time in which the static file response is cached,
     //0 means cache forever, the negative value means no cache
     "static_files_cache_time": 5,
-    //simple_controllers_map: Used to configure mapping from path to simple controller
-    //    "simple_controllers_map": [
-    //      {
-    //        "path": "/path/name",
-    //        "controller": "controllerClassName",
-    //        "http_methods": [
-    //          "get",
-    //          "post"
-    //        ],
-    //        "filters": [
-    //          "FilterClassName"
-    //        ]
-    //      }
-    //    ],
+
     //idle_connection_timeout: Defaults to 60 seconds, the lifetime
     //of the connection without read or write
     "idle_connection_timeout": 60,
@@ -303,5 +290,7 @@
     }
   ],
   //custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method.
-  "custom_config": {}
+  "custom_config": {
+    "base_image_dir": "./"
+  }
 }

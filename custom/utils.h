@@ -7,7 +7,6 @@
 #include <drogon/drogon.h>
 #include <ctime>
 #include <type_traits>
-#include <opencv2/opencv.hpp>
 #include "snowflake.h"
 
 namespace drogon {
@@ -39,10 +38,6 @@ namespace drogon {
         static void tolower_string(std::string &str);
 
         static void toupper_string(std::string &str);
-
-        static cv::Mat concat_mat_horizontal(const cv::Mat &m1, const cv::Mat &m2);
-
-        static cv::Mat concat_mat_vertical(const cv::Mat &m1, const cv::Mat &m2);
 
         static std::string front_time_to_backend(const std::string &fronted_time);
 

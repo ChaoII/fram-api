@@ -24,7 +24,6 @@ void User::login(const HttpRequestPtr &req, std::function<void(const HttpRespons
         Mapper<Users> mp(drogon::app().getDbClient());
         auto user_ = mp.findBy(Criteria(Users::Cols::_username, CompareOperator::EQ, username) &&
                                Criteria(Users::Cols::_password, CompareOperator::EQ, password));
-
         if (!user_.empty()) {
             auto now = std::chrono::system_clock::now();
             auto exp = now + std::chrono::hours(7 * 24); // 过期时间为当前时间 + 7 天

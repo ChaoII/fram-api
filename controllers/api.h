@@ -13,7 +13,7 @@ class api : public drogon::HttpController<api> {
 public:
     METHOD_LIST_BEGIN
         // use METHOD_ADD to add your custom processing function here;
-        ADD_METHOD_TO(api::add_face_libs, "/api/add_face_libs", Put);
+        ADD_METHOD_TO(api::add_face, "/api/add_face", Options, Put);
         ADD_METHOD_TO(api::get_face_infos, "/api/get_face_infos", Options, Post);
         ADD_METHOD_TO(api::get_attend_infos, "/api/get_attend_infos", Options, Post);
         ADD_METHOD_TO(api::delete_face, "/api/delete_face", Options, Delete);
@@ -25,7 +25,7 @@ public:
 
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
-    void add_face_libs(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
+    void add_face(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
 
     void get_face_infos(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
 

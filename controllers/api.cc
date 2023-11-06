@@ -10,71 +10,40 @@ using Attend = drogon_model::sqlite3::Attend;
 using Staff = drogon_model::sqlite3::Staff;
 // Add definition of your processing function here
 
-void save_face_info(Json::Value &staff_info) {
-    auto clientPtr = drogon::app().getDbClient();
-    Mapper<Staff> mp(clientPtr);
-    auto uid = staff_info["uid"].asString();
-    auto name = staff_info["name"].asString();
-    auto file_path = staff_info["file_path"].asString();
-    auto staff_ = mp.findBy(Criteria(Staff::Cols::_uid, CompareOperator::EQ, uid));
-    Staff staff;
-    staff.setUid(uid);
-    staff.setName(name);
-    staff.setPicUrl(file_path);
-    staff.setRegisterTime("");
-    if (staff_.empty()) {
-        mp.insert(staff);
-    } else {
-        std::vector<std::string> update_col_names;
-        update_col_names.emplace_back("update_time");
-        mp.updateBy(update_col_names, Criteria(Staff::Cols::_uid, CompareOperator::EQ, uid),
-                    "");
-    }
-}
 
-
-void
-api::add_face_libs(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
-
+void api::add_face(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
     MultiPartParser fileUpload;
     fileUpload.parse(req);
-    Json::Value root, sub;
-    auto clientPtr = drogon::app().getDbClient();
-    Mapper<Staff> mp(clientPtr);
-    for (auto &file: fileUpload.getFiles()) {
-        sub["staff_id"] = "";
-        sub["name"] = "";
-        sub["file_path"] = "";
-        sub["message"] = "";
-        const std::string &file_name = file.getFileName();
-        auto staff_info = drogon::utils::splitString(file_name, "_");
-        if (staff_info.size() >= 2) {
-            if (file.getFileExtension() == "jpg") {
-                auto staff_id = staff_info[0];
-                auto name = drogon::utils::splitString(staff_info[1], ".")[0];
-                auto file_path = std::string("./static/facelib/").append(staff_id).append(".jpg");
-                sub["staff_id"] = staff_id;
-                sub["name"] = name;
-                sub["file_path"] = file_path;
-                try {
-                    file.saveAs(file_path);
-                    save_face_info(sub);
-                    sub["message"] = "file upload successfully!";
-                }
-                catch (std::exception &e) {
-                    sub["message"] = "file save failed detail is : .";
-                }
-            } else {
-                sub["message"] = "file's extension must be '.jpg'.";
-            }
-        } else {
-            sub["file_path"] = file_name;
-            sub["message"] = "file name must like 'staffid_name.jpg'.";
+    Json::Value result;
+    LOG_INFO << "add face...";
+    Mapper<Staff> mp(drogon::app().getDbClient());
+    auto file = fileUpload.getFiles()[0];
+    if (file.getFileExtension() == "jpg") {
+        auto uid = fileUpload.getParameters().at("uid");
+        auto name = fileUpload.getParameters().at("name");
+        uint64_t uuid = drogon::Custom::get_uuid();
+        std::string file_path_str = app().getUploadPath() + "/" + uid + "/" + std::to_string(uuid) + ".jpg";
+        fs::path file_path(file_path_str);
+        try {
+            file.saveAs(file_path.string());
+            LOG_INFO << "file save in [" << file_path.parent_path().string() << "]";
+
+            result["code"] = 0;
+            result["data"] = {};
+            result["msg"] = "file upload successfully!";
         }
-        root.append(sub);
+        catch (std::exception &e) {
+            result["code"] = -1;
+            result["data"] = {};
+            result["msg"] = "file save failed detail is : .";
+        }
+    } else {
+        result["code"] = -1;
+        result["data"] = {};
+        result["message"] = "file's extension must be '.jpg'.";
     }
     //save staff info into sqlite3
-    auto resp = HttpResponse::newHttpJsonResponse(root);
+    auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
 }
 
@@ -89,7 +58,6 @@ void api::get_face_infos(const HttpRequestPtr &req, std::function<void(const Htt
         callback(resp);
         return;
     }
-
     std::string name = obj->get("name", "").asString();
     if (name.empty())
         name = "%";
@@ -180,7 +148,7 @@ void api::delete_face(const HttpRequestPtr &req, std::function<void(const HttpRe
     auto staffs = mp.findBy(Criteria(Staff::Cols::_uid, CompareOperator::EQ, uid));
     //delete face_img
     bool is_removed = true;
-    for (auto staff: staffs) {
+    for (auto &staff: staffs) {
         if (0 == remove(staff.getPicUrl()->data())) {
             LOG_INFO << "delete file [" << staff.getValueOfPicUrl() << "] success";
             fs::path file_path(staff.getValueOfPicUrl());

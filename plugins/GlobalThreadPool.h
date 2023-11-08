@@ -1,33 +1,30 @@
 /**
  *
- *  Socket.h
+ *  GlobalThreadPool.h
  *
  */
 
 #pragma once
 
 #include <drogon/plugins/Plugin.h>
-#include "custom/Socket.h"
+#include <workspace/workspace.h>
 
 
-class Socket : public drogon::Plugin<Socket> {
+class GlobalThreadPool : public drogon::Plugin<GlobalThreadPool> {
 public:
-    Socket() {}
+    GlobalThreadPool() {}
 
     /// This method must be called by drogon to initialize and start the plugin.
     /// It must be implemented by the user.
     void initAndStart(const Json::Value &config) override;
 
+    std::shared_ptr<wsp::workbranch> getGlobalThreadPool();
+
     /// This method must be called by drogon to shutdown the plugin.
     /// It must be implemented by the user.
     void shutdown() override;
 
-
-    void send_message(const std::string &message);
-
 private:
-    std::string address_;
-    int port_;
-    std::unique_ptr<CustomSocket> custom_socket_ptr;
+    std::shared_ptr<wsp::workbranch> pool_;
 };
 

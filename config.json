@@ -274,15 +274,19 @@
     //plugins: Define all plugins running in the application
     "plugins": [
         {
-            //name: The class name of the plugin
-            "name": "Socket",
-            //dependencies: Plugins that the plugin depends on. It can be commented out
+            "name": "TrantorSocketClient",
             "dependencies": [],
-            //config: The configuration of the plugin. This json object is the parameter to initialize the plugin.
-            //It can be commented out
             "config": {
-                "address": "0.0.0.0",
-                "port": 8899
+                "address": "127.0.0.1",
+                "port": 9088
+            }
+        },
+        {
+            "name": "GlobalThreadPool",
+            "dependencies": [],
+            "config": {
+                "thread_pool_size": 5,
+                "port": 9088
             }
         }
     ],

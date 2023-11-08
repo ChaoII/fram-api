@@ -5,31 +5,29 @@
 
 using namespace drogon;
 
-namespace api
-{
-class User : public drogon::HttpController<User>
-{
-  public:
-    METHOD_LIST_BEGIN
-        ADD_METHOD_TO(User::login, "/api/user/login", Options, Post);
-        ADD_METHOD_TO(User::add_user, "/api/user/addUser", Options, Put, "LoginFilter");
-        ADD_METHOD_TO(User::get_user, "/api/user/getUser", Options, Get, "LoginFilter");
-        ADD_METHOD_TO(User::del_user, "/api/user/delUser", Options, Delete, "LoginFilter");
-        ADD_METHOD_TO(User::edit_user, "/api/user/editUser", Options, Post, "LoginFilter");
-        ADD_METHOD_TO(User::modify_password, "/api/user/modify_password", Options, Post, "LoginFilter");
-    METHOD_LIST_END
+namespace api {
+    class User : public drogon::HttpController<User> {
+    public:
+        METHOD_LIST_BEGIN
+            ADD_METHOD_TO(User::login, "/api/user/login", Options, Post);
+            ADD_METHOD_TO(User::addUser, "/api/user/addUser", Options, Put, "LoginFilter");
+            ADD_METHOD_TO(User::getUser, "/api/user/getUser", Options, Get, "LoginFilter");
+            ADD_METHOD_TO(User::delUser, "/api/user/delUser", Options, Delete, "LoginFilter");
+            ADD_METHOD_TO(User::editUser, "/api/user/editUser", Options, Post, "LoginFilter");
+            ADD_METHOD_TO(User::modifyPassword, "/api/user/modifyPassword", Options, Post, "LoginFilter");
+        METHOD_LIST_END
 
-    void login(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
+        void login(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
 
-    void add_user(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
+        void addUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
 
-    void get_user(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
+        void getUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
 
-    void del_user(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
+        void delUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
 
-    void edit_user(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
+        void editUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
 
-    void modify_password(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
+        void modifyPassword(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
 
-};
+    };
 }

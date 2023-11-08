@@ -3,10 +3,11 @@ project(backend CXX)
 
 include(CheckIncludeFileCXX)
 
-if(MSVC)
+if (MSVC)
     set(CMAKE_TOOLCHAIN_FILE "E:/vcpkg/scripts/buildsystems/vcpkg.cmake")
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options(/wd4244 /wd4100 /wd4101 /wd4267)
 endif ()
 
 # jwt-cpp
@@ -14,6 +15,11 @@ include_directories("${CMAKE_SOURCE_DIR}/3rdpart/jwt-cpp/include")
 #find_path(TWT_INCLUDE_DIRS "jwt-cpp/base.h")
 find_package(OpenSSL REQUIRED)
 list(APPEND DEPENDS OpenSSL::SSL OpenSSL::Crypto)
+
+# workspace
+add_definitions(-DNOMINMAX)
+include_directories("${CMAKE_SOURCE_DIR}/3rdpart/workspace/include")
+
 
 check_include_file_cxx(any HAS_ANY)
 check_include_file_cxx(string_view HAS_STRING_VIEW)
@@ -32,8 +38,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME} main.cc
-        custom/Socket.cpp
-        custom/Socket.h)
+)
 
 
 #

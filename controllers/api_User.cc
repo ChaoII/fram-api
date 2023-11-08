@@ -49,7 +49,7 @@ void User::login(const HttpRequestPtr &req, std::function<void(const HttpRespons
     callback(resp);
 }
 
-void User::add_user(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
+void User::addUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
     Json::Value result, sub;
     auto obj = req->getJsonObject();
     if (obj == nullptr) {
@@ -91,7 +91,7 @@ void User::add_user(const HttpRequestPtr &req, std::function<void(const HttpResp
     callback(resp);
 }
 
-void User::get_user(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
+void User::getUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
 
     std::string search_name = req->getParameter("searchName");
     int page_size = std::stoi(req->getParameter("pageSize"));
@@ -119,7 +119,7 @@ void User::get_user(const HttpRequestPtr &req, std::function<void(const HttpResp
     callback(resp);
 }
 
-void User::del_user(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
+void User::delUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
 
     Json::Value result, sub;
     auto obj = req->getJsonObject();
@@ -155,7 +155,7 @@ void User::del_user(const HttpRequestPtr &req, std::function<void(const HttpResp
     callback(resp);
 }
 
-void User::edit_user(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
+void User::editUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
 
     Json::Value result, sub;
     auto obj = req->getJsonObject();
@@ -195,7 +195,7 @@ void User::edit_user(const HttpRequestPtr &req, std::function<void(const HttpRes
     callback(resp);
 }
 
-void User::modify_password(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
+void User::modifyPassword(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
     Json::Value result, sub;
     auto obj = req->getJsonObject();
     if (obj == nullptr) {

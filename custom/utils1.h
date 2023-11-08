@@ -17,10 +17,6 @@ namespace drogon {
 
         static bool update_time(const std::string &host = "172.168.100.79:8112",
                                 const std::string &api_path = "/api/services/assistant/UserConfig/GetNow");
-
-        static std::string currentDateTime();
-
-        static std::string time_delta(int d = 7, int h = 0, int m = 0, int s = 0);
     };
 }
 

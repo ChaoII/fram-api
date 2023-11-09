@@ -292,6 +292,9 @@
     ],
     //custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method.
     "custom_config": {
+        "time_synchronization_server_host": "172.168.100.79:8112",
+        "time_synchronization_server_api": "/api/services/assistant/UserConfig/GetNow",
+        "FRAM_app_name": "FRAM",
         "base_image_dir": "./"
     }
 }

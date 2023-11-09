@@ -10,14 +10,6 @@ using Users = drogon_model::sqlite3::Users;
 void User::login(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
     Json::Value result, sub;
     auto obj = req->getJsonObject();
-    if (obj == nullptr) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error, must be {'username':'xx','password':'xx'}";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     std::string username = obj->get("username", "").asString();
     std::string password = drogon::utils::getMd5(obj->get("password", "").asString());
     if (!username.empty() && !password.empty()) {
@@ -52,14 +44,6 @@ void User::login(const HttpRequestPtr &req, std::function<void(const HttpRespons
 void User::addUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
     Json::Value result, sub;
     auto obj = req->getJsonObject();
-    if (obj == nullptr) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error, must be {'username':'xx','password':'xx'}";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     std::string username = obj->get("username", "").asString();
     std::string nickname = obj->get("nickname", "").asString();
     std::string password = drogon::utils::getMd5(obj->get("password", "").asString());
@@ -123,14 +107,6 @@ void User::delUser(const HttpRequestPtr &req, std::function<void(const HttpRespo
 
     Json::Value result, sub;
     auto obj = req->getJsonObject();
-    if (obj == nullptr) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     std::string id = obj->get("id", "").asString();
     if (id.empty()) {
         result["code"] = -1;
@@ -159,14 +135,6 @@ void User::editUser(const HttpRequestPtr &req, std::function<void(const HttpResp
 
     Json::Value result, sub;
     auto obj = req->getJsonObject();
-    if (obj == nullptr) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     std::string id = obj->get("id", "").asString();
     std::string username = obj->get("username", "").asString();
     std::string nickname = obj->get("nickname", "").asString();
@@ -198,14 +166,6 @@ void User::editUser(const HttpRequestPtr &req, std::function<void(const HttpResp
 void User::modifyPassword(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) {
     Json::Value result, sub;
     auto obj = req->getJsonObject();
-    if (obj == nullptr) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     std::string username = obj->get("username", "").asString();
     std::string old_password = drogon::utils::getMd5(obj->get("oldPassword", "").asString());
     LOG_INFO << username;

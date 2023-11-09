@@ -4,36 +4,47 @@
 using namespace api;
 
 void Device::updateTime(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
-
-//    bool ret = Custom::update_time();
-//    auto resp = HttpResponse::newHttpResponse();
-//    if (ret) {
-//        resp->setStatusCode(drogon::k200OK);
-//        resp->setBody("success");
-//    } else {
-//        resp->setStatusCode(drogon::k408RequestTimeout);
-//        resp->setBody("failed，时间同步接口访问超时ß");
-//    }
-//    callback(resp);
-
+    Json::Value response_result, client_result;
+    std::string host = drogon::app().getCustomConfig().get("time_synchronization_server_host", "").asString();
+    std::string api_path = drogon::app().getCustomConfig().get("time_synchronization_server_api", "").asString();
+    auto client = HttpClient::newHttpClient(host);
+    auto client_req = HttpRequest::newHttpRequest();
+    client_req->setPath(api_path);
+    client_req->setMethod(drogon::Post);
+    client_req->setContentTypeCode(ContentType::CT_APPLICATION_JSON);
+    client_req->setBody("{}");
+    auto ret = client->sendRequest(client_req);
+    if (ret.first != ReqResult::Ok) {
+        response_result["code"] = -1;
+        response_result["data"] = {};
+        response_result["message"] = "time synchronization successfully";
+    }
+    Json::Reader reader;
+    reader.parse(std::string(ret.second->getBody()), client_result);
+#if defined(__linux__) || defined(__APPLE__)
+    system((std::string("sudo date -s ") + client_result["result"].asString()).c_str());
+    LOG_INFO<<"update datetime successfully!";
+#else
+    LOG_WARN << "your operator system is not linux,ony linux the datetime update is needed.";
+#endif
 }
 
-
-void Device::restartDevice(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
-    auto resp = HttpResponse::newHttpResponse();
-
+void Device::restartProgram(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
+    Json::Value result;
+    std::string fram_app_name = drogon::app().getCustomConfig().get("FRAM_APP_name", "FRAM").asString();
+    result["code"] = 0;
+    result["data"] = {};
+    result["message"] = "restarting...";
 #if __LINUX__
-    system("ps aux | grep main.py | awk '{print $2}' | xargs kill -9");
-    resp->setStatusCode(drogon::k200OK);
-    resp->setBody("更新成功");
-#elif __APPLE__
-    resp->setStatusCode(drogon::k200OK);
-    resp->setBody("this is apple group which has been unsupported this program");
-    LOG_WARN << "this is apple group which has been unsupported this program";
+    system("ps aux | grep "+ fram_app_name + "| awk '{print $2}' | xargs kill -9");
+    result["code"] = 0;
+    result["data"] = {};
+    result["message"] = "restarting...";
 #else
-    resp->setStatusCode(drogon::k400BadRequest);
-    resp->setBody("tplease check your operate system");
-    LOG_WARN << "please check your operate system";
+    result["code"] = 0;
+    result["data"] = {};
+    result["message"] = " only support linux system please check your operate system;";
 #endif
+    auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
 }

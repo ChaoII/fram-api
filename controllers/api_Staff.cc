@@ -5,9 +5,9 @@
 #include <trantor/net/EventLoop.h>
 #include "plugins/TrantorSocketClient.h"
 
-namespace fs = std::filesystem;
-using namespace drogon::orm;
 using namespace api;
+using namespace drogon::orm;
+namespace fs = std::filesystem;
 using StaffModel = drogon_model::sqlite3::Staff;
 
 void Staff::addFace(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
@@ -20,7 +20,7 @@ void Staff::addFace(const HttpRequestPtr &req, std::function<void(const HttpResp
         if (file.getFileExtension() == "jpg") {
             auto uid = fileUpload.getParameters().at("uid");
             auto name = fileUpload.getParameters().at("name");
-            uint64_t uuid = drogon::Custom::get_uuid();
+            uint64_t uuid = drogon::Custom::getUuid();
             std::string file_path_str = app().getUploadPath() + "/" + uid + "/" + std::to_string(uuid) + ".jpg";
             fs::path file_path(file_path_str);
             try {
@@ -65,14 +65,6 @@ void Staff::deleteFace(const HttpRequestPtr &req, std::function<void(const HttpR
 
     Json::Value result, sub;
     auto obj = req->getJsonObject();
-    if (obj == nullptr) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     std::string index_id = obj->get("index_id", "").asString();
     app().getPlugin<TrantorSocketClient>()->sendMessage("-1@" + index_id);
     auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->submit([&]() {
@@ -100,21 +92,12 @@ void Staff::deleteFace(const HttpRequestPtr &req, std::function<void(const HttpR
 void Staff::getFaceInfos(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
     Json::Value face_list, sub, result, root;
     auto obj = req->getJsonObject();
-    if (obj == nullptr) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     std::string name = obj->get("query_name", "").asString();
     if (name.empty())
         name = "%";
     int page_size = obj->get("pageSize", "").asInt();
     int page_index = obj->get("pageIndex", "").asInt();
     Mapper<StaffModel> mp(drogon::app().getDbClient());
-
     auto conditions = Criteria(StaffModel::Cols::_name, CompareOperator::Like, name);
     auto face_infos = mp.limit(page_size).offset(
             (page_index - 1) * page_size).findBy(conditions);

@@ -10,17 +10,9 @@ void Attend::getAttendInfos(const HttpRequestPtr &req,
                             std::function<void(const HttpResponsePtr &)> &&callback) const {
     Json::Value attend_list, sub, result, root;
     auto obj = req->getJsonObject();
-    if (obj == nullptr) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     std::string attend_name = obj->get("attend_name", "").asString();
-    std::string start_time = drogon::Custom::front_time_to_backend(obj->get("start_time", "").asString());
-    std::string end_time = drogon::Custom::front_time_to_backend(obj->get("end_time", "").asString());
+    std::string start_time = drogon::Custom::frontTimeToBackend(obj->get("start_time", "").asString());
+    std::string end_time = drogon::Custom::frontTimeToBackend(obj->get("end_time", "").asString());
     if (attend_name.empty())
         attend_name = "%";
     int page_size = obj->get("pageSize", "").asInt();
@@ -54,37 +46,17 @@ void Attend::getAttendInfos(const HttpRequestPtr &req,
 
 void Attend::clearHistoryAttendData(const HttpRequestPtr &req,
                                     std::function<void(const HttpResponsePtr &)> &&callback) const {
-    std::string start_time;
-    std::string end_time;
     auto resp = HttpResponse::newHttpResponse();
-    try {
-        auto time_obj = req->getJsonObject();
-        if (time_obj == nullptr) {
-            resp->setBody("请传入正确的json对象，{}被允许");
-            resp->setStatusCode(k400BadRequest);
-            callback(resp);
-            return;
-        }
-        if (time_obj->empty()) {
+    auto time_obj = req->getJsonObject();
+    std::string start_time = (*time_obj)["start_time"].asString();
+    std::string end_time = (*time_obj)["end_time"].asString();
+    Mapper<AttendModel> mp(drogon::app().getDbClient());
+    mp.deleteBy((Criteria(AttendModel::Cols::_attend_time, CompareOperator::GE, start_time) &&
+                 Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time)));
 
-        } else {
-            start_time = (*time_obj)["start_time"].asString();
-            end_time = (*time_obj)["end_time"].asString();
-        }
-        auto clientPtr = drogon::app().getDbClient();
-        Mapper<AttendModel> mp(clientPtr);
-        mp.deleteBy((Criteria(AttendModel::Cols::_attend_time, CompareOperator::GE, start_time) &&
-                     Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time)));
-
-        resp->setStatusCode(k200OK);
-        resp->setBody("数据清除成功");
-        callback(resp);
-    }
-    catch (std::exception &e) {
-        resp->setStatusCode(drogon::k500InternalServerError);
-        resp->setBody(std::string("数据清除错误") + e.what());
-        callback(resp);
-    }
+    resp->setStatusCode(k200OK);
+    resp->setBody("数据清除成功");
+    callback(resp);
 }
 
 

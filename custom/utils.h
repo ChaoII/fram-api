@@ -16,7 +16,7 @@ namespace drogon {
     public:
         Custom() = default;
 
-        static uint64_t get_uuid();
+        static uint64_t getUuid();
 
         template<class T>
         static std::vector<char> toByte(T *buffer, size_t n) {
@@ -27,22 +27,22 @@ namespace drogon {
             return vec;
         }
 
-        static void JsDateToDrogonDate(std::string &js_date);
+        static void jsDateToDrogonDate(std::string &js_date);
 
-        static void replace_str(std::string &str, const std::string &before, const std::string &after);
+        static void replaceString(std::string &str, const std::string &before, const std::string &after);
 
-        static bool json_array_2_vector(const Json::Value &array, std::vector<std::string> &vec);
+        static bool jsonArrayToVector(const Json::Value &array, std::vector<std::string> &vec);
 
-        static trantor::Date format_date_time(const std::string &data_time);
+        static trantor::Date formatDateTime(const std::string &data_time);
 
-        static void tolower_string(std::string &str);
+        static void toLower(std::string &str);
 
-        static void toupper_string(std::string &str);
+        static void toUpper(std::string &str);
 
-        static std::string front_time_to_backend(const std::string &fronted_time);
+        static std::string frontTimeToBackend(const std::string &fronted_time);
 
         template<class T>
-        static bool target_in_vector(std::vector<T> &vec, T target) {
+        static bool targetInVector(std::vector<T> &vec, T target) {
             auto it = std::find(vec.begin(), vec.end(), target);
             if (it == vec.end()) {
                 return false;

@@ -12,7 +12,10 @@ void NotNullFilter::doFilter(const HttpRequestPtr &req,
                              FilterCallback &&fcb,
                              FilterChainCallback &&fccb) {
 
-    if (req->getMethod() == HttpMethod::Options) {
+    LOG_INFO << "enter in NotNullFilter";
+
+    auto method = req->getMethod();
+    if (method == Options || method == Get || method == Put) {
         fccb();
         return;
     }

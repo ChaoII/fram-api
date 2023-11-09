@@ -14,9 +14,8 @@ namespace api {
     public:
         METHOD_LIST_BEGIN
             ADD_METHOD_TO(Staff::addFace, "/api/staff/addFace", Options, Put, "LoginFilter");
-            ADD_METHOD_TO(Staff::deleteFace, "/api/staff/deleteFace", Options, Delete, "NotNullFilter", "LoginFilter");
-            ADD_METHOD_TO(Staff::getFaceInfos, "/api/staff/getFaceInfos", Options, Post, "NotNullFilter",
-                          "LoginFilter");
+            ADD_METHOD_TO(Staff::deleteFace, "/api/staff/deleteFace", Options, Delete, "LoginFilter");
+            ADD_METHOD_TO(Staff::getFaceInfos, "/api/staff/getFaceInfos", Options, Post, "LoginFilter");
         METHOD_LIST_END
 
         void addFace(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;

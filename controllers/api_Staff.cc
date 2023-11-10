@@ -14,46 +14,49 @@ void Staff::addFace(const HttpRequestPtr &req, std::function<void(const HttpResp
     MultiPartParser fileUpload;
     fileUpload.parse(req);
     Json::Value result, sub;
-    LOG_INFO << "add face...";
+    std::string glob_file_path_str;
+    LOG_INFO << "[start add face ]...";
     auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->submit([&]() {
         auto file = fileUpload.getFiles()[0];
         if (file.getFileExtension() == "jpg") {
             auto uid = fileUpload.getParameters().at("uid");
             auto name = fileUpload.getParameters().at("name");
             uint64_t uuid = drogon::Custom::getUuid();
-            std::string file_path_str = app().getUploadPath() + "/" + uid + "/" + std::to_string(uuid) + ".jpg";
-            fs::path file_path(file_path_str);
+            glob_file_path_str = app().getUploadPath() + "/" + uid + "/" + std::to_string(uuid) + ".jpg";
+            fs::path file_path(glob_file_path_str);
             try {
                 file.saveAs(file_path.string());
                 LOG_INFO << "file save in [" << file_path.parent_path().string() << "]";
                 std::string message = "1@" + fs::absolute(file_path).string() + "@" + uid + "@" + name;
                 drogon::app().getPlugin<TrantorSocketClient>()->sendMessage(message);
+                auto start = std::chrono::steady_clock::now();
                 while (app().getPlugin<TrantorSocketClient>()->getReceiveMsg().empty()) {
                     std::this_thread::sleep_for(std::chrono::microseconds(500));
+                    auto end = std::chrono::steady_clock::now();
+                    auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                    if (interval >= 2000) {
+                        LOG_INFO << "time_out";
+                        drogon::Custom::removeFileWithParentDir(glob_file_path_str);
+                        return drogon::Custom::getJsonResult(-1, sub, "add face failed, for socket server time out");
+                    }
                 }
                 auto receive_result = app().getPlugin<TrantorSocketClient>()->getReceiveMsg();
                 LOG_INFO << receive_result;
                 sub["error"] = receive_result;
                 if (receive_result == "0x0001") {
-                    //update json file
-                    result["code"] = 0;
-                    result["data"] = sub;
-                    result["msg"] = "success";
+                    result = drogon::Custom::getJsonResult(0, sub, "success");
                 } else {
-                    result["code"] = -1;
-                    result["data"] = sub;
-                    result["msg"] = "delete failed";
+                    drogon::Custom::removeFileWithParentDir(glob_file_path_str);
+                    result = drogon::Custom::getJsonResult(-1, sub, "add face failed");
                 }
             }
             catch (std::exception &e) {
-                result["code"] = -1;
-                result["data"] = {};
-                result["msg"] = "file save failed detail is : .";
+                LOG_INFO << "delete failed, detail:" << e.what();
+                drogon::Custom::removeFileWithParentDir(glob_file_path_str);
+                result = drogon::Custom::getJsonResult(-1, sub, "delete face failed");
             }
         } else {
-            result["code"] = -1;
-            result["data"] = {};
-            result["message"] = "file's extension must be '.jpg'.";
+            result = drogon::Custom::getJsonResult(-1, sub, "delete face failed");
         }
         return result;
     });
@@ -74,14 +77,9 @@ void Staff::deleteFace(const HttpRequestPtr &req, std::function<void(const HttpR
         auto receive_result = app().getPlugin<TrantorSocketClient>()->getReceiveMsg();
         sub["error"] = receive_result;
         if (receive_result == "0x0002") {
-            //update json file
-            result["code"] = 0;
-            result["data"] = sub;
-            result["msg"] = "success";
+            result = drogon::Custom::getJsonResult(0, sub, "delete success");
         } else {
-            result["code"] = -1;
-            result["data"] = sub;
-            result["msg"] = "delete failed";
+            result = drogon::Custom::getJsonResult(-1, sub, "delete failed");
         }
         return result;
     });
@@ -112,10 +110,8 @@ void Staff::getFaceInfos(const HttpRequestPtr &req, std::function<void(const Htt
         face_list.append(sub);
     }
     root["face_infos"] = face_list;
-    result["code"] = 0;
     root["total"] = total;
-    result["data"] = root;
-    result["msg"] = "success";
+    result = drogon::Custom::getJsonResult(0, root, "success");
     auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
 }

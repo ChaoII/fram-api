@@ -6,6 +6,7 @@
 
 #include "LoginFilter.h"
 #include <jwt-cpp/jwt.h>
+#include "custom/utils.h"
 
 using namespace drogon;
 
@@ -32,10 +33,7 @@ void LoginFilter::doFilter(const HttpRequestPtr &req,
         return;
     } catch (const std::exception &ex) {
         LOG_WARN << ex.what();
-        Json::Value result;
-        result["code"] = -2;
-        result["data"] = ex.what();
-        result["msg"] = "login error please login again";
+        auto result = drogon::Custom::getJsonResult(-2, ex.what(), "request params error");
         auto res = drogon::HttpResponse::newHttpJsonResponse(result);
         res->setStatusCode(k401Unauthorized);
         fcb(res);

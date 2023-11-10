@@ -7,6 +7,7 @@
 #include <drogon/drogon.h>
 #include <ctime>
 #include <type_traits>
+#include <filesystem>
 #include "snowflake.h"
 
 namespace drogon {
@@ -40,6 +41,10 @@ namespace drogon {
         static void toUpper(std::string &str);
 
         static std::string frontTimeToBackend(const std::string &fronted_time);
+
+        static bool removeFileWithParentDir(const std::string &str);
+
+        static Json::Value getJsonResult(int code, const Json::Value &data, const std::string &msg);
 
         template<class T>
         static bool targetInVector(std::vector<T> &vec, T target) {

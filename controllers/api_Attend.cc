@@ -35,10 +35,8 @@ void Attend::getAttendInfos(const HttpRequestPtr &req,
         attend_list.append(sub);
     }
     root["attend_infos"] = attend_list;
-    result["code"] = 0;
     root["total"] = total;
-    result["data"] = root;
-    result["msg"] = "success";
+    result = drogon::Custom::getJsonResult(0, root, "success");
     auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
 }
@@ -46,7 +44,6 @@ void Attend::getAttendInfos(const HttpRequestPtr &req,
 
 void Attend::clearHistoryAttendData(const HttpRequestPtr &req,
                                     std::function<void(const HttpResponsePtr &)> &&callback) const {
-    auto resp = HttpResponse::newHttpResponse();
     auto time_obj = req->getJsonObject();
     std::string start_time = (*time_obj)["start_time"].asString();
     std::string end_time = (*time_obj)["end_time"].asString();
@@ -54,8 +51,8 @@ void Attend::clearHistoryAttendData(const HttpRequestPtr &req,
     mp.deleteBy((Criteria(AttendModel::Cols::_attend_time, CompareOperator::GE, start_time) &&
                  Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time)));
 
-    resp->setStatusCode(k200OK);
-    resp->setBody("数据清除成功");
+    auto result = drogon::Custom::getJsonResult(0, {}, "clear attend history data success");
+    auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
 }
 

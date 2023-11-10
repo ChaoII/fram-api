@@ -15,9 +15,9 @@ void Device::updateTime(const HttpRequestPtr &req, std::function<void(const Http
     client_req->setBody("{}");
     auto ret = client->sendRequest(client_req);
     if (ret.first != ReqResult::Ok) {
-        response_result["code"] = -1;
-        response_result["data"] = {};
-        response_result["message"] = "time synchronization successfully";
+        response_result = drogon::Custom::getJsonResult(-1, {}, "time synchronization failed");
+        auto res = HttpResponse::newHttpJsonResponse(response_result);
+        callback(res);
     }
     Json::Reader reader;
     reader.parse(std::string(ret.second->getBody()), client_result);
@@ -27,23 +27,23 @@ void Device::updateTime(const HttpRequestPtr &req, std::function<void(const Http
 #else
     LOG_WARN << "your operator system is not linux,ony linux the datetime update is needed.";
 #endif
+    response_result = drogon::Custom::getJsonResult(0, {}, "time synchronization successfully");
+    auto res = HttpResponse::newHttpJsonResponse(response_result);
+    callback(res);
 }
 
 void Device::restartProgram(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
     Json::Value result;
     std::string fram_app_name = drogon::app().getCustomConfig().get("FRAM_APP_name", "FRAM").asString();
-    result["code"] = 0;
-    result["data"] = {};
-    result["message"] = "restarting...";
+
 #if __LINUX__
     system("ps aux | grep "+ fram_app_name + "| awk '{print $2}' | xargs kill -9");
     result["code"] = 0;
     result["data"] = {};
     result["message"] = "restarting...";
+    result = drogon::Custom::getJsonResult(0, {}, "restarting...");
 #else
-    result["code"] = 0;
-    result["data"] = {};
-    result["message"] = " only support linux system please check your operate system;";
+    result = drogon::Custom::getJsonResult(-1, {}, "only support linux system please check your operate system;");
 #endif
     auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);

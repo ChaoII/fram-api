@@ -87,3 +87,25 @@ std::string Custom::frontTimeToBackend(const string &fronted_time) {
     replaceString(time, "Z", "");
     return parts[0] + "" + time;
 }
+
+bool Custom::removeFileWithParentDir(const std::string &str) {
+    std::filesystem::path p(str);
+    if (std::filesystem::exists(p)) {
+        std::filesystem::remove(p);
+        LOG_INFO << "delete file" << str;
+        if (p.has_parent_path() && std::filesystem::is_empty(p.parent_path())) {
+            std::filesystem::remove(p.parent_path());
+            LOG_INFO << p.parent_path().string() << "is empty, delete it...";
+        }
+        return true;
+    }
+    return false;
+}
+
+Json::Value Custom::getJsonResult(int code, const Json::Value &data, const string &msg) {
+    Json::Value result;
+    result["code"] = code;
+    result["data"] = data;
+    result["msg"] = msg;
+    return result;
+}

@@ -2,6 +2,7 @@
 #include "models/Users.h"
 #include "jwt-cpp/jwt.h"
 #include <drogon/orm/Mapper.h>
+#include "custom/utils.h"
 
 using namespace api;
 using namespace drogon::orm;
@@ -28,13 +29,10 @@ void User::login(const HttpRequestPtr &req, std::function<void(const HttpRespons
             sub["token"] = token;
             sub["nickname"] = *user_[0].getNickname();
             sub["username"] = username;
-            result["code"] = 0;
-            result["data"] = sub;
-            result["msg"] = "login success";
+            result = drogon::Custom::getJsonResult(0, sub, "login success");
         } else {
-            result["code"] = -1;
-            result["data"] = {};
-            result["msg"] = "login please checkout username or password, if you dont register please register a account firstly";
+            result = drogon::Custom::getJsonResult(-1, sub,
+                                                   "login please checkout username or password, if you dont register please register a account firstly");
         }
     }
     auto resp = HttpResponse::newHttpJsonResponse(result);
@@ -48,9 +46,7 @@ void User::addUser(const HttpRequestPtr &req, std::function<void(const HttpRespo
     std::string nickname = obj->get("nickname", "").asString();
     std::string password = drogon::utils::getMd5(obj->get("password", "").asString());
     if (username.empty() || password.empty()) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "username or password can not be empty";
+        result = drogon::Custom::getJsonResult(-1, sub, "username or password can not be empty");
         auto resp = HttpResponse::newHttpJsonResponse(result);
         callback(resp);
         return;
@@ -63,13 +59,11 @@ void User::addUser(const HttpRequestPtr &req, std::function<void(const HttpRespo
         user.setPassword(password);
         user.setNickname(nickname);
         mp.insert(user);
-        result["code"] = 0;
-        result["data"] = {username};
-        result["msg"] = "register success";
+        sub["username"] = username;
+        result = drogon::Custom::getJsonResult(0, sub, "register success");
     } else {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "register failed, username has been used, please change your username";
+        result = drogon::Custom::getJsonResult(-1, sub,
+                                               "register failed, username has been used, please change your username");
     }
     auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
@@ -96,9 +90,7 @@ void User::getUser(const HttpRequestPtr &req, std::function<void(const HttpRespo
     }
     root["user"] = user_list;
     root["total"] = count;
-    result["code"] = 0;
-    result["data"] = root;
-    result["msg"] = "success";
+    result = drogon::Custom::getJsonResult(0, root, "success");
     auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
 }
@@ -108,24 +100,12 @@ void User::delUser(const HttpRequestPtr &req, std::function<void(const HttpRespo
     Json::Value result, sub;
     auto obj = req->getJsonObject();
     std::string id = obj->get("id", "").asString();
-    if (id.empty()) {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "request params error";
-        auto resp = HttpResponse::newHttpJsonResponse(result);
-        callback(resp);
-        return;
-    }
     Mapper<Users> mp(drogon::app().getDbClient());
     size_t size = mp.deleteBy(Criteria(Users::Cols::_id, CompareOperator::EQ, id));
     if (size > 0) {
-        result["code"] = 0;
-        result["data"] = {};
-        result["msg"] = "delete success";
+        result = drogon::Custom::getJsonResult(0, id, "delete success");
     } else {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "delete failed";
+        result = drogon::Custom::getJsonResult(-1, id, "delete failed");
     }
     auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
@@ -146,18 +126,12 @@ void User::editUser(const HttpRequestPtr &req, std::function<void(const HttpResp
         user.setNickname(nickname);
         size_t size = mp.update(user);
         if (size <= 0) {
-            result["code"] = -1;
-            result["data"] = {};
-            result["msg"] = "update failed";
+            result = drogon::Custom::getJsonResult(-1, *obj, "update failed");
         } else {
-            result["code"] = 0;
-            result["data"] = *obj;
-            result["msg"] = "update success";
+            result = drogon::Custom::getJsonResult(0, *obj, "update success");
         }
     } else {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "delete failed";
+        result = drogon::Custom::getJsonResult(-1, *obj, "user is not existing");
     }
     auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);
@@ -168,8 +142,6 @@ void User::modifyPassword(const HttpRequestPtr &req, std::function<void(const Ht
     auto obj = req->getJsonObject();
     std::string username = obj->get("username", "").asString();
     std::string old_password = drogon::utils::getMd5(obj->get("oldPassword", "").asString());
-    LOG_INFO << username;
-    LOG_INFO << old_password;
     std::string new_password = drogon::utils::getMd5(obj->get("newPassword", "").asString());
     Mapper<Users> mp(drogon::app().getDbClient());
     auto users = mp.findBy(Criteria(Users::Cols::_username, CompareOperator::EQ, username) &&
@@ -179,13 +151,10 @@ void User::modifyPassword(const HttpRequestPtr &req, std::function<void(const Ht
         Users user = users[0];
         user.setPassword(new_password);
         mp.update(user);
-        result["code"] = 0;
-        result["data"] = sub;
-        result["msg"] = "password modify successful!";
+        result = drogon::Custom::getJsonResult(0, sub, "password modify successful!");
     } else {
-        result["code"] = -1;
-        result["data"] = {};
-        result["msg"] = "password modify failed,please ensure old password is correct!";
+        result = drogon::Custom::getJsonResult(-1, sub,
+                                               "password modify failed,please ensure old password is correct!");
     }
     auto resp = HttpResponse::newHttpJsonResponse(result);
     callback(resp);

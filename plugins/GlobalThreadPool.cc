@@ -22,3 +22,4 @@ void GlobalThreadPool::shutdown() {
     /// Shutdown the plugin
     pool_->del_worker();
 }
+

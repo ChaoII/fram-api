@@ -11,6 +11,7 @@
 #include <drogon/orm/Field.h>
 #include <drogon/orm/SqlBinder.h>
 #include <drogon/orm/Mapper.h>
+#include <drogon/orm/BaseBuilder.h>
 #ifdef __cpp_impl_coroutine
 #include <drogon/orm/CoroMapper.h>
 #endif
@@ -155,6 +156,10 @@ class Attend
     /// Relationship interfaces
   private:
     friend drogon::orm::Mapper<Attend>;
+    friend drogon::orm::BaseBuilder<Attend, true, true>;
+    friend drogon::orm::BaseBuilder<Attend, true, false>;
+    friend drogon::orm::BaseBuilder<Attend, false, true>;
+    friend drogon::orm::BaseBuilder<Attend, false, false>;
 #ifdef __cpp_impl_coroutine
     friend drogon::orm::CoroMapper<Attend>;
 #endif

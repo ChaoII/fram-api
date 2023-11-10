@@ -11,6 +11,7 @@
 #include <drogon/orm/Field.h>
 #include <drogon/orm/SqlBinder.h>
 #include <drogon/orm/Mapper.h>
+#include <drogon/orm/BaseBuilder.h>
 #ifdef __cpp_impl_coroutine
 #include <drogon/orm/CoroMapper.h>
 #endif
@@ -178,6 +179,10 @@ class Staff
     /// Relationship interfaces
   private:
     friend drogon::orm::Mapper<Staff>;
+    friend drogon::orm::BaseBuilder<Staff, true, true>;
+    friend drogon::orm::BaseBuilder<Staff, true, false>;
+    friend drogon::orm::BaseBuilder<Staff, false, true>;
+    friend drogon::orm::BaseBuilder<Staff, false, false>;
 #ifdef __cpp_impl_coroutine
     friend drogon::orm::CoroMapper<Staff>;
 #endif

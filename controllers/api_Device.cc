@@ -33,18 +33,5 @@ void Device::updateTime(const HttpRequestPtr &req, std::function<void(const Http
 }
 
 void Device::restartProgram(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const {
-    Json::Value result;
-    std::string fram_app_name = drogon::app().getCustomConfig().get("FRAM_APP_name", "FRAM").asString();
 
-#if __LINUX__
-    system("ps aux | grep "+ fram_app_name + "| awk '{print $2}' | xargs kill -9");
-    result["code"] = 0;
-    result["data"] = {};
-    result["message"] = "restarting...";
-    result = drogon::Custom::getJsonResult(0, {}, "restarting...");
-#else
-    result = drogon::Custom::getJsonResult(-1, {}, "only support linux system please check your operate system;");
-#endif
-    auto resp = HttpResponse::newHttpJsonResponse(result);
-    callback(resp);
 }

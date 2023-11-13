@@ -11,8 +11,15 @@ void Attend::getAttendInfos(const HttpRequestPtr &req,
     Json::Value attend_list, sub, result, root;
     auto obj = req->getJsonObject();
     std::string attend_name = obj->get("attend_name", "").asString();
-    std::string start_time = drogon::Custom::frontTimeToBackend(obj->get("start_time", "").asString());
-    std::string end_time = drogon::Custom::frontTimeToBackend(obj->get("end_time", "").asString());
+    std::string start_time = obj->get("start_time", "").asString();
+    std::string end_time = obj->get("end_time", "").asString();
+    if (start_time.empty()) {
+        start_time = trantor::Date::now().roundDay().toCustomedFormattedStringLocal("%Y-%m-%dT%H:%M:%S", true);
+    }
+    if (end_time.empty()) {
+        end_time = trantor::Date::now().roundDay().after(24 * 60 * 60).toCustomedFormattedStringLocal(
+                "%Y-%m-%dT%H:%M:%S", true);
+    }
     if (attend_name.empty())
         attend_name = "%";
     int page_size = obj->get("pageSize", "").asInt();

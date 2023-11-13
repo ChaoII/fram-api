@@ -48,7 +48,7 @@
             //rdbms: Server type, postgresql,mysql or sqlite3, "postgresql" by default
             "rdbms": "sqlite3",
             //filename: Sqlite3 db file name
-            "filename": "data.db",
+            "filename": "E:/develop/FRAM_QT/build/data.db",
             //host: Server address,localhost by default
             //"host": "127.0.0.1",
             //port: Server port, 5432 by default
@@ -104,7 +104,7 @@
         "enable_session": false,
         "session_timeout": 0,
         //document_root: Root path of HTTP document, defaut path is ./
-        "document_root": "./",
+        "document_root": "E:/develop/FRAM_QT/build",
         //home_page: Set the HTML file of the home page, the default value is "dashboard.csp"
         //If there isn't any handler registered to the path "/", the home page file in the "document_root" is send to clients as a response
         //to the request for "/".

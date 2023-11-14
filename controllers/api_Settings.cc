@@ -119,7 +119,15 @@ void Settings::updateSettings(const HttpRequestPtr &req,
                         (-1 * delete_interval + 8 * 60 * 60)).toCustomedFormattedStringLocal("%Y-%m-%dT%H:%M:%S", true);
                 Mapper<AttendModel> mp_(drogon::app().getDbClient());
                 LOG_INFO << "delete data before[" << end_time << "]";
-                mp_.deleteBy(Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time));
+                auto conditions = Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time);
+                auto attends = mp_.findBy(conditions);
+                for (auto &attend: attends) {
+                    auto pic_path = attend.getValueOfPicUrl();
+                    LOG_INFO << "delete face: [" << pic_path << "]";
+                    drogon::Custom::removeFileWithParentDir(pic_path);
+                    auto id_ = attend.getValueOfId();
+                    mp.deleteBy(Criteria(AttendModel::Cols::_id, CompareOperator::EQ, id_));
+                }
                 // 开启定期删除任务
                 drogon::app().getLoop()->invalidateTimer(globalCache_.at("timerId"));
                 trantor::TimerId timer_id = drogon::app().getLoop()->runEvery(delete_interval, [&]() {
@@ -128,7 +136,15 @@ void Settings::updateSettings(const HttpRequestPtr &req,
                             -1 * delete_interval).toCustomedFormattedStringLocal(
                             "%Y-%m-%dT%H:%M:%S", true);
                     LOG_INFO << "delete data before[" << end_time << "]";
-                    mp_.deleteBy(Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time));
+                    auto conditions = Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time);
+                    auto attends = mp_.findBy(conditions);
+                    for (auto &attend: attends) {
+                        auto pic_path = attend.getValueOfPicUrl();
+                        drogon::Custom::removeFileWithParentDir(pic_path);
+                        LOG_INFO << "delete face: [" << pic_path << "]";
+                        auto id_ = attend.getValueOfId();
+                        mp.deleteBy(Criteria(AttendModel::Cols::_id, CompareOperator::EQ, id_));
+                    }
                 });
                 globalCache_.insert(std::make_pair("timerId", timer_id));
             }

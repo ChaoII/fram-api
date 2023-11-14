@@ -35,7 +35,7 @@ void Staff::addFace(const HttpRequestPtr &req, std::function<void(const HttpResp
                     auto end = std::chrono::steady_clock::now();
                     auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
                     if (interval >= 2000) {
-                        LOG_INFO << "time_out";
+                        LOG_INFO << "add face time_out...";
                         drogon::Custom::removeFileWithParentDir(glob_file_path_str);
                         return drogon::Custom::getJsonResult(-1, sub, "add face failed, for socket server time out");
                     }
@@ -71,8 +71,16 @@ void Staff::deleteFace(const HttpRequestPtr &req, std::function<void(const HttpR
     std::string index_id = obj->get("index_id", "").asString();
     app().getPlugin<TrantorSocketClient>()->sendMessage("-1@" + index_id);
     auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->submit([&]() {
+        auto start = std::chrono::steady_clock::now();
         while (app().getPlugin<TrantorSocketClient>()->getReceiveMsg().empty()) {
             std::this_thread::sleep_for(std::chrono::microseconds(500));
+            // add timeout condition
+            auto end = std::chrono::steady_clock::now();
+            auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+            if (interval >= 2000) {
+                LOG_INFO << "delete face time_out...";
+                return drogon::Custom::getJsonResult(-1, sub, "add face failed, for socket server time out");
+            }
         }
         auto receive_result = app().getPlugin<TrantorSocketClient>()->getReceiveMsg();
         sub["error"] = receive_result;

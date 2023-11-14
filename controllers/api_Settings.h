@@ -20,6 +20,6 @@ namespace api {
         void restartProgram(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
 
     private:
-        inline static std::map<std::string, trantor::TimerId> globalCache_{{"timerId", -1}};
+        inline static std::map<std::string, trantor::TimerId> globalCache_{{"deleteAttendTimerId", -1}};
     };
 }

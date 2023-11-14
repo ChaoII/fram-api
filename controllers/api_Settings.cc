@@ -5,6 +5,7 @@
 #include <trantor/net/EventLoop.h>
 #include "models/Settings.h"
 #include "models/Attend.h"
+#include "plugins/GlobalParameter.h"
 
 using namespace api;
 using namespace drogon::orm;
@@ -129,7 +130,9 @@ void Settings::updateSettings(const HttpRequestPtr &req,
                     mp.deleteBy(Criteria(AttendModel::Cols::_id, CompareOperator::EQ, id_));
                 }
                 // 开启定期删除任务
-                drogon::app().getLoop()->invalidateTimer(globalCache_.at("timerId"));
+                auto last_timer_id = drogon::app().getPlugin<GlobalParameter>()->getDeleteAttendTimerId();
+
+                drogon::app().getLoop()->invalidateTimer(last_timer_id);
                 trantor::TimerId timer_id = drogon::app().getLoop()->runEvery(delete_interval, [&]() {
                     LOG_INFO << "=============execute timer task=================";
                     std::string end_time = trantor::Date::now().after(
@@ -146,7 +149,7 @@ void Settings::updateSettings(const HttpRequestPtr &req,
                         mp.deleteBy(Criteria(AttendModel::Cols::_id, CompareOperator::EQ, id_));
                     }
                 });
-                globalCache_.insert(std::make_pair("timerId", timer_id));
+                drogon::app().getPlugin<GlobalParameter>()->setDeleteAttendTimerId(timer_id);
             }
             result = drogon::Custom::getJsonResult(0, *obj, "update settings success");
         }

@@ -90,12 +90,14 @@ std::string Custom::frontTimeToBackend(const string &fronted_time) {
 
 bool Custom::removeFileWithParentDir(const std::string &str) {
     std::filesystem::path p(str);
-    if (std::filesystem::exists(p)) {
-        std::filesystem::remove(p);
+    std::filesystem::path root_dir(drogon::app().getCustomConfig().get("base_image_dir", "./").asString());
+    std::filesystem::path absolute_path = root_dir / p;
+    if (std::filesystem::exists(absolute_path)) {
+        std::filesystem::remove(absolute_path);
         LOG_INFO << "delete file" << str;
-        if (p.has_parent_path() && std::filesystem::is_empty(p.parent_path())) {
-            std::filesystem::remove(p.parent_path());
-            LOG_INFO << p.parent_path().string() << "is empty, delete it...";
+        if (absolute_path.has_parent_path() && std::filesystem::is_empty(absolute_path.parent_path())) {
+            std::filesystem::remove(absolute_path.parent_path());
+            LOG_INFO << absolute_path.parent_path().string() << "is empty, delete it...";
         }
         return true;
     }

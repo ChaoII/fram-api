@@ -316,6 +316,6 @@
     ],
     "custom_config": {
         "FRAM_app_name": "FRAM",
-        "base_image_dir": "./"
+        "base_image_dir": "E:/develop/FRAM_QT/build"
     }
 }

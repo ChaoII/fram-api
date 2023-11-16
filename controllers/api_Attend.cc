@@ -30,7 +30,7 @@ void Attend::getAttendInfos(const HttpRequestPtr &req,
                        Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time)) &&
                       Criteria(AttendModel::Cols::_name, CompareOperator::Like, attend_name);
     auto attend_infos = mp.limit(page_size).offset(
-            (page_index - 1) * page_size).findBy(conditions);
+            (page_index - 1) * page_size).orderBy(AttendModel::Cols::_attend_time, SortOrder::DESC).findBy(conditions);
     size_t total = mp.count(conditions);
 
     for (auto &attend_info: attend_infos) {

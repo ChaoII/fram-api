@@ -106,7 +106,7 @@ void Staff::getFaceInfos(const HttpRequestPtr &req, std::function<void(const Htt
     Mapper<StaffModel> mp(drogon::app().getDbClient());
     auto conditions = Criteria(StaffModel::Cols::_name, CompareOperator::Like, name);
     auto face_infos = mp.limit(page_size).offset(
-            (page_index - 1) * page_size).findBy(conditions);
+            (page_index - 1) * page_size).orderBy(StaffModel::Cols::_register_time, SortOrder::DESC).findBy(conditions);
     size_t total = mp.count(conditions);
     for (auto &face_info: face_infos) {
         sub["id"] = std::to_string(face_info.getValueOfId());

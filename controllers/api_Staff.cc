@@ -69,7 +69,7 @@ void Staff::deleteFace(const HttpRequestPtr &req, std::function<void(const HttpR
     Json::Value result, sub;
     auto obj = req->getJsonObject();
     std::string index_id = obj->get("index_id", "").asString();
-    app().getPlugin<TrantorSocketClient>()->sendMessage("-1@" + index_id);
+    app().getPlugin<TrantorSocketClient>()->sendMessage("2@" + index_id);
     auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->submit([&]() {
         auto start = std::chrono::steady_clock::now();
         while (app().getPlugin<TrantorSocketClient>()->getReceiveMsg().empty()) {

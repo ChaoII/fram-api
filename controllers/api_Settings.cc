@@ -2,6 +2,8 @@
 #include "custom/utils.h"
 #include <filesystem>
 #include "plugins/GlobalThreadPool.h"
+#include "plugins/TrantorSocketClient.h"
+#include "plugins/LoopTask.h"
 #include <trantor/net/EventLoop.h>
 #include "models/Settings.h"
 #include "models/Attend.h"
@@ -95,7 +97,7 @@ void Settings::getSettings(const HttpRequestPtr &req, std::function<void(const H
 
 void Settings::updateSettings(const HttpRequestPtr &req,
                               std::function<void(const HttpResponsePtr &)> &&callback) const {
-    Json::Value result;
+    Json::Value result, sub;
     auto obj = req->getJsonObject();
     uint64_t id = obj->get("id", "").asUInt64();
     int64_t delete_interval_num = obj->get("deleteIntervalNum", "").asInt64();
@@ -118,38 +120,13 @@ void Settings::updateSettings(const HttpRequestPtr &req,
                 // 获取当前时间立即删除
                 std::string end_time = trantor::Date::now().after(
                         (-1 * delete_interval + 8 * 60 * 60)).toCustomedFormattedStringLocal("%Y-%m-%dT%H:%M:%S", true);
-                Mapper<AttendModel> mp_(drogon::app().getDbClient());
-                LOG_INFO << "delete data before[" << end_time << "]";
-                auto conditions = Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time);
-                auto attends = mp_.findBy(conditions);
-                for (auto &attend: attends) {
-                    auto pic_path = attend.getValueOfPicUrl();
-                    LOG_INFO << "delete face: [" << pic_path << "]";
-                    drogon::Custom::removeFileWithParentDir(pic_path);
-                    auto id_ = attend.getValueOfId();
-                    mp.deleteBy(Criteria(AttendModel::Cols::_id, CompareOperator::EQ, id_));
-                }
-                // 开启定期删除任务
-                auto last_timer_id = drogon::app().getPlugin<GlobalParameter>()->getDeleteAttendTimerId();
 
-                drogon::app().getLoop()->invalidateTimer(last_timer_id);
-                trantor::TimerId timer_id = drogon::app().getLoop()->runEvery(delete_interval, [&]() {
-                    LOG_INFO << "=============execute timer task=================";
-                    std::string end_time = trantor::Date::now().after(
-                            -1 * delete_interval).toCustomedFormattedStringLocal(
-                            "%Y-%m-%dT%H:%M:%S", true);
-                    LOG_INFO << "delete data before[" << end_time << "]";
-                    auto conditions = Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time);
-                    auto attends = mp_.findBy(conditions);
-                    for (auto &attend: attends) {
-                        auto pic_path = attend.getValueOfPicUrl();
-                        drogon::Custom::removeFileWithParentDir(pic_path);
-                        LOG_INFO << "delete face: [" << pic_path << "]";
-                        auto id_ = attend.getValueOfId();
-                        mp.deleteBy(Criteria(AttendModel::Cols::_id, CompareOperator::EQ, id_));
-                    }
-                });
-                drogon::app().getPlugin<GlobalParameter>()->setDeleteAttendTimerId(timer_id);
+                auto ret = drogon::app().getPlugin<LoopTask>()->startDeleteAttendTimer(delete_interval, end_time);
+                if (ret.get()) {
+                    result = drogon::Custom::getJsonResult(0, *obj, "updaet setting success");
+                } else {
+                    result = drogon::Custom::getJsonResult(0, *obj, "update setting failed");
+                }
             }
             result = drogon::Custom::getJsonResult(0, *obj, "update settings success");
         }

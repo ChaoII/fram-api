@@ -89,7 +89,6 @@ std::future<bool> LoopTask::startDeleteAttendTimer(double internal, const std::s
             auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             if (interval >= 2000) {
                 LOG_INFO << "delete face time_out...";
-
             }
         }
         auto receive_result = app().getPlugin<TrantorSocketClient>()->getReceiveMsg();

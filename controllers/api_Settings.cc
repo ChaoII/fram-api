@@ -142,8 +142,9 @@ void Settings::restartProgram(const HttpRequestPtr &req,
     Json::Value result;
     std::string fram_app_name = drogon::app().getCustomConfig().get("FRAM_APP_name", "FRAM").asString();
 
-#if __LINUX__
-    system("ps aux | grep "+ fram_app_name + "| awk '{print $2}' | xargs kill -9");
+#if __linux__
+    //system("ps aux | grep "+ fram_app_name + "| awk '{print $2}' | xargs kill -9");
+    system(std::string("pkill ")+ fram_app_name);
     result["code"] = 0;
     result["data"] = {};
     result["message"] = "restarting...";

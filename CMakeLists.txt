@@ -15,12 +15,6 @@ include_directories("${CMAKE_SOURCE_DIR}/3rdpart/jwt-cpp/include")
 #find_path(TWT_INCLUDE_DIRS "jwt-cpp/base.h")
 find_package(OpenSSL REQUIRED)
 list(APPEND DEPENDS OpenSSL::SSL OpenSSL::Crypto)
-
-# workspace
-add_definitions(-DNOMINMAX)
-include_directories("${CMAKE_SOURCE_DIR}/3rdpart/workspace/include")
-
-
 check_include_file_cxx(any HAS_ANY)
 check_include_file_cxx(string_view HAS_STRING_VIEW)
 check_include_file_cxx(coroutine HAS_COROUTINE)
@@ -37,8 +31,7 @@ endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(${PROJECT_NAME} main.cc
-)
+add_executable(${PROJECT_NAME} main.cc)
 
 
 #

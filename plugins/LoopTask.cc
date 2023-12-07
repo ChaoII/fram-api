@@ -59,7 +59,7 @@ std::future<bool> LoopTask::startDeleteAttendTimer(double internal, const std::s
     LOG_INFO << "开启定时任务,任务间隔" << internal << "s";
     trantor::TimerId timer_id = drogon::app().getLoop()->runEvery(internal, [&]() {
         app().getPlugin<TrantorSocketClient>()->sendMessage("3@" + endTime);
-        app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->submit([&]() {
+        app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->commit([&]() {
             auto start = std::chrono::steady_clock::now();
             while (app().getPlugin<TrantorSocketClient>()->getReceiveMsg().empty()) {
                 std::this_thread::sleep_for(std::chrono::microseconds(500));
@@ -80,7 +80,7 @@ std::future<bool> LoopTask::startDeleteAttendTimer(double internal, const std::s
     });
     deleteAttendTimerId = timer_id;
     app().getPlugin<TrantorSocketClient>()->sendMessage("3@" + endTime);
-    auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->submit([&]() {
+    auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->commit([&]() {
         auto start = std::chrono::steady_clock::now();
         while (app().getPlugin<TrantorSocketClient>()->getReceiveMsg().empty()) {
             std::this_thread::sleep_for(std::chrono::microseconds(500));

@@ -285,8 +285,7 @@
             "name": "GlobalThreadPool",
             "dependencies": [],
             "config": {
-                "thread_pool_size": 5,
-                "port": 9088
+                "thread_pool_size": 15,
             }
         },
         {

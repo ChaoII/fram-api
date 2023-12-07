@@ -16,7 +16,7 @@ void Staff::addFace(const HttpRequestPtr &req, std::function<void(const HttpResp
     Json::Value result, sub;
     std::string glob_file_path_str;
     LOG_INFO << "[start add face ]...";
-    auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->submit([&]() {
+    auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->commit([&]() {
         auto file = fileUpload.getFiles()[0];
         if (file.getFileExtension() == "jpg") {
             auto uid = fileUpload.getParameters().at("uid");
@@ -70,7 +70,7 @@ void Staff::deleteFace(const HttpRequestPtr &req, std::function<void(const HttpR
     auto obj = req->getJsonObject();
     std::string index_id = obj->get("index_id", "").asString();
     app().getPlugin<TrantorSocketClient>()->sendMessage("2@" + index_id);
-    auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->submit([&]() {
+    auto ret = app().getPlugin<GlobalThreadPool>()->getGlobalThreadPool()->commit([&]() {
         auto start = std::chrono::steady_clock::now();
         while (app().getPlugin<TrantorSocketClient>()->getReceiveMsg().empty()) {
             std::this_thread::sleep_for(std::chrono::microseconds(500));

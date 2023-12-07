@@ -16,7 +16,7 @@ void TrantorSocketClient::initAndStart(const Json::Value &config) {
     tcp_client_ = std::make_shared<trantor::TcpClient>(drogon::app().getLoop(),
                                                        trantor::InetAddress(address, port), "tcp_client");
 
-    tcp_client_->setConnectionCallback([=, this](const trantor::TcpConnectionPtr &conn) {
+    tcp_client_->setConnectionCallback([&](const trantor::TcpConnectionPtr &conn) {
         if (conn->connected()) {
             LOG_INFO << "Connected to server successful";
         } else {

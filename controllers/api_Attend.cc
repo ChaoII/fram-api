@@ -48,6 +48,38 @@ void Attend::getAttendInfos(const HttpRequestPtr &req,
     callback(resp);
 }
 
+void Attend::get_attend_infos(const HttpRequestPtr &req,
+                              std::function<void(const HttpResponsePtr &)> &&callback) const {
+    Json::Value attend_list, sub, result, root;
+    auto obj = req->getJsonObject();
+    std::string start_time = obj->get("start_time", "").asString();
+    std::string end_time = obj->get("end_time", "").asString();
+    if (start_time.empty()) {
+        start_time = trantor::Date::now().roundDay().toCustomedFormattedStringLocal("%Y-%m-%dT%H:%M:%S", true);
+    }
+    if (end_time.empty()) {
+        end_time = trantor::Date::now().roundDay().after(24 * 60 * 60).toCustomedFormattedStringLocal(
+                "%Y-%m-%dT%H:%M:%S", true);
+    }
+
+    Mapper<AttendModel> mp(drogon::app().getDbClient());
+    auto conditions = Criteria(AttendModel::Cols::_attend_time, CompareOperator::GE, start_time) &&
+                      Criteria(AttendModel::Cols::_attend_time, CompareOperator::LE, end_time);
+    auto attend_infos = mp.findBy(conditions);
+
+    for (auto &attend_info: attend_infos) {
+        sub["id"] = std::to_string(attend_info.getValueOfId());
+        sub["staff_id"] = attend_info.getValueOfUid();
+        sub["name"] = attend_info.getValueOfName();
+        sub["attend_time"] = attend_info.getValueOfAttendTime();
+        attend_list.append(sub);
+    }
+    root["result"] = attend_list;
+    result = drogon::Custom::getJsonResult(0, root, "success");
+    auto resp = HttpResponse::newHttpJsonResponse(result);
+    callback(resp);
+}
+
 
 void Attend::clearHistoryAttendData(const HttpRequestPtr &req,
                                     std::function<void(const HttpResponsePtr &)> &&callback) const {

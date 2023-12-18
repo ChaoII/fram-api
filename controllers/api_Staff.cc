@@ -42,7 +42,7 @@ void Staff::addFace(const HttpRequestPtr &req, std::function<void(const HttpResp
                 }
                 auto receive_result = app().getPlugin<TrantorSocketClient>()->getReceiveMsg();
                 LOG_INFO << receive_result;
-                sub["error"] = receive_result;
+                sub["code"] = receive_result;
                 if (receive_result == "0x0001") {
                     result = drogon::Custom::getJsonResult(0, sub, "success");
                 } else {

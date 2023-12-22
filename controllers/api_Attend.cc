@@ -56,10 +56,16 @@ void Attend::get_attend_infos(const HttpRequestPtr &req,
     std::string end_time = obj->get("end_time", "").asString();
     if (start_time.empty()) {
         start_time = trantor::Date::now().roundDay().toCustomedFormattedStringLocal("%Y-%m-%dT%H:%M:%S", true);
+    } else {
+        start_time = trantor::Date::fromDbStringLocal(start_time).
+                toCustomedFormattedStringLocal("%Y-%m-%dT%H:%M:%S", true);
     }
     if (end_time.empty()) {
         end_time = trantor::Date::now().roundDay().after(24 * 60 * 60).toCustomedFormattedStringLocal(
                 "%Y-%m-%dT%H:%M:%S", true);
+    } else {
+        end_time = trantor::Date::fromDbStringLocal(end_time).
+                toCustomedFormattedStringLocal("%Y-%m-%dT%H:%M:%S", true);
     }
 
     Mapper<AttendModel> mp(drogon::app().getDbClient());
@@ -75,8 +81,10 @@ void Attend::get_attend_infos(const HttpRequestPtr &req,
         attend_list.append(sub);
     }
     root["result"] = attend_list;
-    result = drogon::Custom::getJsonResult(0, root, "success");
-    auto resp = HttpResponse::newHttpJsonResponse(result);
+    root["message"] = "success";
+    root["code"] = 0;
+
+    auto resp = HttpResponse::newHttpJsonResponse(root);
     callback(resp);
 }
 

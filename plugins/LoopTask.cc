@@ -19,6 +19,8 @@ void LoopTask::initAndStart(const Json::Value &config) {
         Json::Value client_result;
         std::string host = config.get("time_synchronization_server_host", "").asString();
         std::string api_path = config.get("time_synchronization_server_api", "").asString();
+        LOG_INFO << host;
+        LOG_INFO << api_path;
         auto client = HttpClient::newHttpClient(host);
         auto client_req = HttpRequest::newHttpRequest();
         client_req->setPath(api_path);
@@ -28,6 +30,7 @@ void LoopTask::initAndStart(const Json::Value &config) {
         client->sendRequest(
                 client_req,
                 [&](ReqResult r, const HttpResponsePtr &resp) {
+                    auto c= resp->getJsonObject()->get("name","").asString();
                     if (r != ReqResult::Ok) {
                         LOG_ERROR << r;
                         return;

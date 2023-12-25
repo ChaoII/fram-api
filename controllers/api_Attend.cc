@@ -83,7 +83,6 @@ void Attend::get_attend_infos(const HttpRequestPtr &req,
     root["result"] = attend_list;
     root["message"] = "success";
     root["code"] = 0;
-
     auto resp = HttpResponse::newHttpJsonResponse(root);
     callback(resp);
 }

@@ -13,12 +13,13 @@ namespace api {
             ADD_METHOD_TO(Attend::clearHistoryAttendData, "/api/attend/clearHistoryAttendData", Options, Delete,
                           "LoginFilter");
             ADD_METHOD_TO(Attend::getAttendInfos, "/api/attend/getAttendInfos", Options, Post, "LoginFilter");
-            ADD_METHOD_TO(Attend::get_attend_infos, "/api/get_attend_infos", Options, Post);
+            ADD_METHOD_TO(Attend::get_attended_infos, "/api/get_attended_infos", Options, Post);
         METHOD_LIST_END
 
         void getAttendInfos(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
 
-        void get_attend_infos(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
+        void
+        get_attended_infos(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const;
 
         void clearHistoryAttendData(const HttpRequestPtr &req,
                                     std::function<void(const HttpResponsePtr &)> &&callback) const;

@@ -24,15 +24,25 @@ public:
     /// It must be implemented by the user.
     void shutdown() override;
 
-    std::future<bool> startDeleteAttendTimer(double internal, const std::string &endTime);
+    void deleteAttendHistory(double interval, bool enable_delete);
 
-    trantor::TimerId getUpdateTimerId();
 
 private:
-    trantor::TimerId updateTimeTimerId = -1;
+    void deleteAttendHistorySub(double interval);
 
-    trantor::TimerId deleteAttendTimerId = -1;
+    void updateDeleteAttendTimer(double interval);
 
+    void deleteAttendAtStart();
 
+    void startUpdateDateTimeTask();
+
+    void startUpdateDateTimeTaskSub();
+
+private:
+
+    std::string host_;
+    std::string api_path_;
+    trantor::TimerId updateTimeTimerId_ = -1;
+    trantor::TimerId deleteAttendTimerId_ = -1;
 };
 

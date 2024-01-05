@@ -48,8 +48,8 @@ void Attend::getAttendInfos(const HttpRequestPtr &req,
     callback(resp);
 }
 
-void Attend::get_attend_infos(const HttpRequestPtr &req,
-                              std::function<void(const HttpResponsePtr &)> &&callback) const {
+void Attend::get_attended_infos(const HttpRequestPtr &req,
+                                std::function<void(const HttpResponsePtr &)> &&callback) const {
     Json::Value attend_list, sub, result, root;
     auto obj = req->getJsonObject();
     std::string start_time = obj->get("start_time", "").asString();
@@ -81,7 +81,7 @@ void Attend::get_attend_infos(const HttpRequestPtr &req,
         attend_list.append(sub);
     }
     root["result"] = attend_list;
-    root["message"] = "success";
+    root["message"] = "";
     root["code"] = 0;
     auto resp = HttpResponse::newHttpJsonResponse(root);
     callback(resp);

@@ -22,7 +22,9 @@ void LoopTask::initAndStart(const Json::Value &config) {
 
     host_ = config.get("time_synchronization_server_host", "").asString();
     api_path_ = config.get("time_synchronization_server_api", "").asString();
-    deleteAttendAtStart();
+    app().getLoop()->runAfter(20s, [&]() {
+        deleteAttendAtStart();
+    });
     startUpdateDateTimeTask();
 }
 
@@ -87,7 +89,7 @@ void LoopTask::deleteAttendAtStart() {
     bool is_enable_delete = settings_.getValueOfIsEnableDelete();
     if (is_enable_delete) {
         auto delete_interval = IntervalHelper::interValNumToSecondDouble(delete_interval_num, delete_interval_unit);
-        drogon::app().getPlugin<LoopTask>()->deleteAttendHistory(delete_interval, is_enable_delete);
+        deleteAttendHistory(delete_interval, is_enable_delete);
     }
 }
 

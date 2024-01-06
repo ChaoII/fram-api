@@ -285,12 +285,14 @@
             "name": "GlobalThreadPool",
             "dependencies": [],
             "config": {
-                "thread_pool_size": 15,
+                "thread_pool_size": 15
             }
         },
         {
             "name": "drogon::plugin::GlobalFilters",
-            "dependencies": [],
+            "dependencies": [
+                "TrantorSocketClient"
+            ],
             "config": {
                 "filters": [
                     "NotNullFilter"

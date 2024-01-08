@@ -19,7 +19,6 @@ using namespace std::chrono_literals;
 using namespace drogon;
 
 void LoopTask::initAndStart(const Json::Value &config) {
-
     host_ = config.get("time_synchronization_server_host", "").asString();
     api_path_ = config.get("time_synchronization_server_api", "").asString();
     app().getLoop()->runAfter(20s, [&]() {
